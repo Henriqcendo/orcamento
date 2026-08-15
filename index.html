@@ -1,0 +1,1476 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Orçamento de Obra</title>
+  <meta name="description" content="Aplicativo interativo para cotação e comparação de preços de materiais de construção entre fornecedores." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    /* =========================================================
+       RESET & BASE
+    ========================================================= */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:          #0d1117;
+      --surface:     #161b22;
+      --surface2:    #1e2530;
+      --border:      #30363d;
+      --border-light:#3d444d;
+      --text:        #e6edf3;
+      --text-muted:  #8b949e;
+      --accent:      #58a6ff;
+      --accent-dim:  #1c3455;
+      --green:       #3fb950;
+      --green-dim:   #0e2d17;
+      --red:         #f85149;
+      --orange:      #e3b341;
+      --purple:      #bc8cff;
+      --teal:        #39d353;
+
+      /* Category colors */
+      --cat1: #1e3a5f;
+      --cat1t: #58a6ff;
+      --cat2: #2d1e5f;
+      --cat2t: #bc8cff;
+      --cat3: #1e4a2d;
+      --cat3t: #3fb950;
+      --cat4: #4a2d1e;
+      --cat4t: #e3b341;
+      --cat5: #4a1e2d;
+      --cat5t: #f778a1;
+      --cat6: #1e424a;
+      --cat6t: #39d353;
+
+      --radius: 12px;
+      --radius-sm: 8px;
+      --shadow: 0 4px 24px rgba(0,0,0,0.4);
+      --font: 'Inter', system-ui, sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* =========================================================
+       HEADER
+    ========================================================= */
+    header {
+      background: linear-gradient(135deg, #0d1117 0%, #161b22 50%, #1a2236 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 20px 14px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(12px);
+    }
+
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent), var(--purple));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .logo-text h1 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.2;
+    }
+
+    .logo-text span {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), #4a9eff);
+      color: #fff;
+    }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(88,166,255,0.3); }
+    .btn-primary:active { transform: translateY(0); }
+
+    .btn-ghost {
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { background: var(--border); }
+
+    .btn-danger {
+      background: rgba(248,81,73,0.15);
+      color: var(--red);
+      border: 1px solid rgba(248,81,73,0.3);
+    }
+    .btn-danger:hover { background: rgba(248,81,73,0.25); }
+
+    .btn-success {
+      background: linear-gradient(135deg, var(--green), #2ea043);
+      color: #fff;
+    }
+    .btn-success:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(63,185,80,0.3); }
+
+    .btn-icon {
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      border-radius: var(--radius-sm);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    /* Sync status */
+    .sync-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      color: var(--text-muted);
+      padding: 4px 8px;
+      background: var(--surface2);
+      border-radius: 20px;
+      border: 1px solid var(--border);
+    }
+
+    .sync-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--text-muted);
+      transition: background 0.3s;
+    }
+    .sync-dot.syncing { background: var(--orange); animation: pulse 1s infinite; }
+    .sync-dot.synced  { background: var(--green); }
+    .sync-dot.error   { background: var(--red); }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* =========================================================
+       SUMMARY CARDS
+    ========================================================= */
+    .summary-bar {
+      padding: 14px 20px;
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+    .summary-bar::-webkit-scrollbar { display: none; }
+
+    .summary-card {
+      flex-shrink: 0;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      min-width: 140px;
+      transition: all 0.2s;
+    }
+
+    .summary-card.cheapest {
+      border-color: var(--green);
+      background: var(--green-dim);
+    }
+
+    .summary-card .supplier-name {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .badge-best {
+      background: var(--green);
+      color: #000;
+      font-size: 9px;
+      padding: 1px 5px;
+      border-radius: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .summary-card .total-value {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .summary-card.cheapest .total-value { color: var(--green); }
+
+    .summary-card .items-filled {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .progress-bar {
+      height: 3px;
+      background: var(--border);
+      border-radius: 2px;
+      margin-top: 6px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 2px;
+      transition: width 0.4s ease;
+    }
+
+    .summary-card.cheapest .progress-fill { background: var(--green); }
+
+    /* =========================================================
+       TOOLBAR
+    ========================================================= */
+    .toolbar {
+      padding: 12px 20px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .toolbar::-webkit-scrollbar { display: none; }
+
+    .toolbar-sep {
+      width: 1px;
+      height: 24px;
+      background: var(--border);
+      flex-shrink: 0;
+    }
+
+    /* =========================================================
+       TABLE WRAPPER
+    ========================================================= */
+    .table-wrapper {
+      padding: 0 0 80px;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      min-width: 700px;
+      border-collapse: collapse;
+    }
+
+    /* Category header rows */
+    .cat-header td {
+      padding: 10px 16px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      border-top: 2px solid;
+      position: sticky;
+      top: 0;
+    }
+
+    /* Individual category header colors */
+    .cat-1 td { background: var(--cat1); color: var(--cat1t); border-color: var(--cat1t); }
+    .cat-2 td { background: var(--cat2); color: var(--cat2t); border-color: var(--cat2t); }
+    .cat-3 td { background: var(--cat3); color: var(--cat3t); border-color: var(--cat3t); }
+    .cat-4 td { background: var(--cat4); color: var(--cat4t); border-color: var(--cat4t); }
+    .cat-5 td { background: var(--cat5); color: var(--cat5t); border-color: var(--cat5t); }
+    .cat-6 td { background: var(--cat6); color: var(--cat6t); border-color: var(--cat6t); }
+
+    /* Column headers */
+    thead.col-headers th {
+      background: var(--surface);
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 10px 12px;
+      border-bottom: 2px solid var(--border);
+      position: sticky;
+      top: 0;
+      white-space: nowrap;
+    }
+
+    thead.col-headers th.price-col {
+      background: var(--surface2);
+      border-left: 1px solid var(--border);
+    }
+
+    thead.col-headers th.supplier-group {
+      text-align: center;
+    }
+
+    /* Data rows */
+    tbody.items-body tr.item-row {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+    }
+
+    tbody.items-body tr.item-row:hover { background: rgba(255,255,255,0.03); }
+
+    tbody.items-body td {
+      padding: 10px 12px;
+      font-size: 13px;
+      vertical-align: middle;
+    }
+
+    .td-item { color: var(--text); font-weight: 600; min-width: 110px; }
+    .td-desc { color: var(--text-muted); font-size: 12px; min-width: 160px; max-width: 220px; }
+    .td-unit { color: var(--text-muted); font-size: 12px; text-align: center; white-space: nowrap; }
+    .td-qty  { color: var(--text); font-weight: 600; text-align: center; }
+
+    /* Price cells */
+    .price-group {
+      border-left: 1px solid var(--border);
+    }
+
+    td.td-price {
+      min-width: 90px;
+      text-align: right;
+    }
+
+    td.td-total {
+      min-width: 100px;
+      text-align: right;
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    /* Editable cell */
+    .editable-cell {
+      cursor: text;
+      padding: 4px 8px;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      outline: none;
+      background: transparent;
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 500;
+      width: 100%;
+      transition: all 0.15s;
+      -webkit-appearance: none;
+    }
+
+    .editable-cell:focus {
+      background: var(--surface2);
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(88,166,255,0.15);
+    }
+
+    .editable-cell.price-input {
+      text-align: right;
+      color: var(--text);
+    }
+
+    .editable-cell.price-input:not([data-val="0"]):not([data-val=""]) {
+      color: var(--text);
+    }
+
+    /* Best price highlight */
+    td.best-price .editable-cell {
+      color: var(--green);
+    }
+
+    td.best-price {
+      background: rgba(63,185,80,0.06);
+    }
+
+    /* Total cell formatting */
+    .total-display {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    td.best-price .total-display {
+      color: rgba(63,185,80,0.8);
+    }
+
+    /* Empty price */
+    .price-empty {
+      color: var(--border-light);
+      font-size: 11px;
+      font-style: italic;
+    }
+
+    /* Row actions */
+    .td-actions {
+      width: 36px;
+      text-align: center;
+    }
+
+    .btn-row-delete {
+      background: none;
+      border: none;
+      color: var(--border-light);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 4px;
+      font-size: 14px;
+      line-height: 1;
+      transition: all 0.15s;
+    }
+
+    .btn-row-delete:hover { color: var(--red); background: rgba(248,81,73,0.1); }
+
+    /* Add item row */
+    .add-item-row td {
+      padding: 6px 12px;
+    }
+
+    /* =========================================================
+       SUPPLIER NAME EDITABLE
+    ========================================================= */
+    .supplier-name-input {
+      background: transparent;
+      border: none;
+      border-bottom: 1px dashed var(--border-light);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 11px;
+      font-weight: 700;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      width: 100%;
+      outline: none;
+      padding: 2px 4px;
+      cursor: text;
+      transition: border-color 0.15s;
+    }
+
+    .supplier-name-input:focus { border-color: var(--accent); }
+
+    /* =========================================================
+       FOOTER TOTALS
+    ========================================================= */
+    tfoot.totals-foot tr td {
+      padding: 12px 12px;
+      border-top: 2px solid var(--border);
+      font-weight: 700;
+      font-size: 13px;
+      background: var(--surface);
+      position: sticky;
+      bottom: 0;
+    }
+
+    .td-total-label {
+      color: var(--text-muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .grand-total {
+      font-size: 15px;
+      font-weight: 800;
+      text-align: right;
+    }
+
+    .grand-total.cheapest-col {
+      color: var(--green);
+    }
+
+    /* =========================================================
+       MODAL
+    ========================================================= */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(4px);
+      z-index: 200;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius) var(--radius) 0 0;
+      padding: 24px 20px;
+      width: 100%;
+      max-width: 480px;
+      max-height: 85vh;
+      overflow-y: auto;
+      animation: slideUp 0.25s ease;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(100%); opacity: 0; }
+      to   { transform: translateY(0); opacity: 1; }
+    }
+
+    .modal-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .form-input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 14px;
+      padding: 10px 12px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .form-input:focus { border-color: var(--accent); }
+
+    .form-row { display: flex; gap: 10px; }
+    .form-row .form-group { flex: 1; }
+
+    .modal-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 20px;
+    }
+
+    .modal-actions .btn { flex: 1; justify-content: center; }
+
+    /* =========================================================
+       FIREBASE SETUP BANNER
+    ========================================================= */
+    .setup-banner {
+      background: linear-gradient(135deg, rgba(88,166,255,0.15), rgba(188,140,255,0.1));
+      border: 1px solid rgba(88,166,255,0.3);
+      border-radius: var(--radius);
+      margin: 16px 20px;
+      padding: 14px 16px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .setup-banner .icon { font-size: 20px; flex-shrink: 0; }
+
+    .setup-banner .text h3 {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+
+    .setup-banner .text p {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .setup-banner .text code {
+      background: rgba(0,0,0,0.3);
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-size: 11px;
+      color: var(--orange);
+    }
+
+    /* =========================================================
+       TOAST NOTIFICATIONS
+    ========================================================= */
+    #toast-container {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 300;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+      width: 90%;
+      max-width: 340px;
+    }
+
+    .toast {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      animation: toastIn 0.25s ease, toastOut 0.25s ease 2.5s forwards;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    }
+
+    .toast.success { border-color: var(--green); }
+    .toast.error   { border-color: var(--red); }
+
+    @keyframes toastIn  { from { opacity: 0; transform: translateY(20px); } }
+    @keyframes toastOut { to   { opacity: 0; transform: translateY(20px); } }
+
+    /* =========================================================
+       RESPONSIVE
+    ========================================================= */
+    @media (max-width: 480px) {
+      .btn span { display: none; }
+      .btn { padding: 8px; }
+      .logo-text span { display: none; }
+    }
+
+    /* =========================================================
+       PRINT STYLES
+    ========================================================= */
+    @media print {
+      header, .toolbar, .summary-bar, .btn-row-delete, .td-actions, .setup-banner { display: none !important; }
+      body { background: #fff; color: #000; }
+      table { min-width: unset; }
+      .editable-cell { border: none; }
+    }
+
+    /* =========================================================
+       CATEGORY INDICATOR STRIP
+    ========================================================= */
+    .cat-strip {
+      width: 4px;
+      border-radius: 2px;
+      display: inline-block;
+      margin-right: 6px;
+      vertical-align: middle;
+      height: 14px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ============================================================
+     HEADER
+============================================================ -->
+<header>
+  <div class="header-top">
+    <div class="logo-area">
+      <div class="logo-icon">🏗️</div>
+      <div class="logo-text">
+        <h1>Orçamento de Obra</h1>
+        <span id="project-subtitle">Cotação de Materiais</span>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div class="sync-badge" id="sync-badge">
+        <div class="sync-dot" id="sync-dot"></div>
+        <span id="sync-label">Local</span>
+      </div>
+      <button class="btn btn-ghost btn-icon" onclick="printPage()" title="Imprimir / PDF">🖨️</button>
+      <button class="btn btn-primary" onclick="saveAll()">
+        <span>💾</span><span>Salvar</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ============================================================
+     FIREBASE SETUP BANNER (hidden when configured)
+============================================================ -->
+<div class="setup-banner" id="setup-banner">
+  <div class="icon">⚙️</div>
+  <div class="text">
+    <h3>Configure o Firebase para sincronização em nuvem</h3>
+    <p>Edite o arquivo <code>index.html</code> e preencha as credenciais na seção <code>FIREBASE CONFIG</code> no topo do JavaScript. Sem isso, os dados são salvos apenas no dispositivo atual.</p>
+  </div>
+</div>
+
+<!-- ============================================================
+     SUMMARY CARDS
+============================================================ -->
+<div class="summary-bar" id="summary-bar">
+  <!-- Populated by JS -->
+</div>
+
+<!-- ============================================================
+     TOOLBAR
+============================================================ -->
+<div class="toolbar">
+  <button class="btn btn-ghost" onclick="openAddItemModal()">
+    ➕ <span>Novo Item</span>
+  </button>
+  <div class="toolbar-sep"></div>
+  <button class="btn btn-ghost" onclick="expandAll()">📂 <span>Expandir</span></button>
+  <button class="btn btn-ghost" onclick="collapseAll()">📁 <span>Recolher</span></button>
+  <div class="toolbar-sep"></div>
+  <button class="btn btn-ghost" onclick="exportCSV()">📊 <span>Exportar CSV</span></button>
+</div>
+
+<!-- ============================================================
+     MAIN TABLE
+============================================================ -->
+<div class="table-wrapper">
+  <table id="budget-table">
+    <thead class="col-headers" id="col-headers">
+      <!-- Populated by JS -->
+    </thead>
+    <tbody id="table-body">
+      <!-- Populated by JS -->
+    </tbody>
+    <tfoot class="totals-foot" id="totals-foot">
+      <!-- Populated by JS -->
+    </tfoot>
+  </table>
+</div>
+
+<!-- ============================================================
+     ADD ITEM MODAL
+============================================================ -->
+<div class="modal-overlay" id="add-item-modal">
+  <div class="modal-panel">
+    <div class="modal-title">➕ Adicionar Item</div>
+    <div class="form-group">
+      <label class="form-label">Categoria</label>
+      <select class="form-input" id="new-category">
+        <!-- Populated by JS -->
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Nome do Item</label>
+      <input type="text" class="form-input" id="new-item-name" placeholder="Ex: Cimento Portland" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Descrição</label>
+      <input type="text" class="form-input" id="new-item-desc" placeholder="Descrição detalhada" />
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Unidade</label>
+        <input type="text" class="form-input" id="new-item-unit" placeholder="Saco, m3..." />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Quantidade</label>
+        <input type="number" class="form-input" id="new-item-qty" placeholder="0" min="0" step="any" />
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeAddItemModal()">Cancelar</button>
+      <button class="btn btn-success" onclick="addItem()">✅ Adicionar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     TOAST CONTAINER
+============================================================ -->
+<div id="toast-container"></div>
+
+<!-- ============================================================
+     SCRIPT
+============================================================ -->
+<script type="module">
+// ============================================================
+//  FIREBASE CONFIG — substitua os valores abaixo pelas suas credenciais
+//  Obtenha em: console.firebase.google.com → Configurações do projeto
+// ============================================================
+const FIREBASE_CONFIG = {
+  apiKey:            "SUA_API_KEY_AQUI",
+  authDomain:        "SEU_PROJETO.firebaseapp.com",
+  projectId:         "SEU_PROJETO_ID",
+  storageBucket:     "SEU_PROJETO.appspot.com",
+  messagingSenderId: "SEU_SENDER_ID",
+  appId:             "SEU_APP_ID"
+};
+
+const IS_FIREBASE_CONFIGURED = !FIREBASE_CONFIG.apiKey.startsWith("SUA_");
+
+// ============================================================
+//  APP STATE
+// ============================================================
+const DEFAULT_SUPPLIERS = ["Fornecedor A", "Fornecedor B", "Fornecedor C"];
+
+const CATEGORY_META = {
+  "1. Concreto e Formas":     { id: 1, emoji: "🪨", short: "Concreto" },
+  "2. Ferragens e Aço":       { id: 2, emoji: "🔩", short: "Ferragens" },
+  "3. Alvenaria e Telhado":   { id: 3, emoji: "🧱", short: "Alvenaria" },
+  "4. Revestimentos":         { id: 4, emoji: "🪟", short: "Revestim." },
+  "5. Portas":                { id: 5, emoji: "🚪", short: "Portas/Janelas" },
+  "6. Louças e Instalações":  { id: 6, emoji: "🚿", short: "Louças/Inst." },
+};
+
+let state = {
+  suppliers: [...DEFAULT_SUPPLIERS],
+  items: [],
+  prices: {},       // key: `${itemId}-${supplierIdx}`, value: number
+  collapsed: {},    // key: category, value: bool
+};
+
+// ============================================================
+//  INITIAL DATA
+// ============================================================
+const INITIAL_ITEMS = [
+  { id: "i1",  cat: "1. Concreto e Formas",    name: "Cimento",              desc: "Cimento Portland (saco 50kg) para 4.3 m³ de concreto 25MPa",       unit: "Saco",   qty: 40  },
+  { id: "i2",  cat: "1. Concreto e Formas",    name: "Areia Média",          desc: "Areia lavada média para concreto",                                  unit: "m³",     qty: 4   },
+  { id: "i3",  cat: "1. Concreto e Formas",    name: "Brita",                desc: "Pedra Brita nº 1 para concreto",                                   unit: "m³",     qty: 4.5 },
+  { id: "i4",  cat: "1. Concreto e Formas",    name: "Madeira (Tábuas)",     desc: "Tábua de pinus 30cm (3 metros) - Reutilizável",                    unit: "Unid.",  qty: 10  },
+  { id: "i5",  cat: "1. Concreto e Formas",    name: "Pregos",               desc: "Prego 18x27 com cabeça",                                           unit: "kg",     qty: 4   },
+  { id: "i6",  cat: "2. Ferragens e Aço",      name: "Aço 8.0mm (5/16)",    desc: "Barra 12m - Para malha das sapatas",                               unit: "Barra",  qty: 7   },
+  { id: "i7",  cat: "2. Ferragens e Aço",      name: "Aço 10.0mm (3/8)",    desc: "Barra 12m - Para arranques das sapatas",                           unit: "Barra",  qty: 6   },
+  { id: "i8",  cat: "2. Ferragens e Aço",      name: "Aço 5.0mm (3/16)",    desc: "Barra 12m - Para estribos",                                        unit: "Barra",  qty: 2   },
+  { id: "i9",  cat: "2. Ferragens e Aço",      name: "Coluna Pronta (Pilares)", desc: "Armadura 14x20cm (ferragem 4x10mm) - 4m",                      unit: "Unid.",  qty: 11  },
+  { id: "i10", cat: "2. Ferragens e Aço",      name: "Coluna Pronta (Vigas)",  desc: "Armadura 14x22cm (ferragem 4x10mm) - 6m",                       unit: "Unid.",  qty: 8   },
+  { id: "i11", cat: "2. Ferragens e Aço",      name: "Arame Recozido",      desc: "Arame recozido nº 18",                                             unit: "kg",     qty: 3   },
+  { id: "i12", cat: "3. Alvenaria e Telhado",  name: "Tijolos",             desc: "Tijolo cerâmico 8 furos",                                          unit: "Milheiro",qty: 1  },
+  { id: "i13", cat: "3. Alvenaria e Telhado",  name: "Telhas",              desc: "Telha colonial",                                                   unit: "Milheiro",qty: 2  },
+  { id: "i14", cat: "3. Alvenaria e Telhado",  name: "Argamassa / Reboco",  desc: "Cimento e areia extra para elevação e reboco",                     unit: "Verba",  qty: 1   },
+  { id: "i15", cat: "4. Revestimentos",        name: "Cerâmica de Piso",    desc: "Revestimento de piso (42m² + 15% perda)",                          unit: "m²",     qty: 49  },
+  { id: "i16", cat: "4. Revestimentos",        name: "Cerâmica de Parede",  desc: "Revestimento de parede até o teto (Cozinha e Banheiro)",           unit: "m²",     qty: 55  },
+  { id: "i17", cat: "4. Revestimentos",        name: "Argamassa Colante",   desc: "Argamassa ACII (saco 20kg)",                                       unit: "Saco",   qty: 26  },
+  { id: "i18", cat: "4. Revestimentos",        name: "Rejunte",             desc: "Rejunte flexível",                                                 unit: "kg",     qty: 35  },
+  { id: "i19", cat: "5. Portas",              name: "Porta da Cozinha",    desc: "Porta externa 80cm completa",                                      unit: "Unid.",  qty: 1   },
+  { id: "i20", cat: "5. Portas",              name: "Porta do Quarto",     desc: "Porta interna de madeira 80cm completa",                           unit: "Unid.",  qty: 1   },
+  { id: "i21", cat: "5. Portas",              name: "Porta do Banheiro",   desc: "Porta interna madeira/alumínio 70cm",                              unit: "Unid.",  qty: 1   },
+  { id: "i22", cat: "5. Portas",              name: "Janela Banheiro",     desc: "Janela basculante",                                                unit: "Unid.",  qty: 1   },
+  { id: "i23", cat: "5. Portas",              name: "Janela Quarto",       desc: "Janela madeira/Alumínio",                                          unit: "Unid.",  qty: 1   },
+  { id: "i24", cat: "5. Portas",              name: "Caixa de Porta",      desc: "Banheiro/Cozinha/Quarto",                                          unit: "Unid.",  qty: 3   },
+  { id: "i25", cat: "6. Louças e Instalações",name: "Bancada Cozinha",     desc: "Bancada em granito (~1.50m) com cuba",                             unit: "Unid.",  qty: 1   },
+  { id: "i26", cat: "6. Louças e Instalações",name: "Bancada Banheiro",    desc: "Bancada em mármore/granito (~0.80m) com cuba",                     unit: "Unid.",  qty: 1   },
+  { id: "i27", cat: "6. Louças e Instalações",name: "Bacia Sanitária",     desc: "Vaso sanitário com caixa acoplada",                                unit: "Unid.",  qty: 1   },
+  { id: "i28", cat: "6. Louças e Instalações",name: "Tanque de Lavar",     desc: "Tanque para lavanderia",                                           unit: "Unid.",  qty: 1   },
+  { id: "i29", cat: "6. Louças e Instalações",name: "Torneiras e Metais",  desc: "Kit torneiras e registros",                                        unit: "Verba",  qty: 1   },
+  { id: "i30", cat: "6. Louças e Instalações",name: "Kit Hidráulico",      desc: "Tubos, conexões e cola",                                           unit: "Verba",  qty: 1   },
+  { id: "i31", cat: "6. Louças e Instalações",name: "Kit Elétrico",        desc: "Cabos, conduítes, tomadas, disjuntores",                           unit: "Verba",  qty: 1   },
+];
+
+// ============================================================
+//  FIREBASE HELPERS
+// ============================================================
+let db = null;
+let docRef = null;
+let saveTimeout = null;
+
+async function initFirebase() {
+  if (!IS_FIREBASE_CONFIGURED) return;
+  try {
+    const { initializeApp }       = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
+    const { getFirestore, doc, getDoc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+
+    const app = initializeApp(FIREBASE_CONFIG);
+    db = getFirestore(app);
+
+    // Use URL param 'id' or generate new one
+    let orcId = new URLSearchParams(window.location.search).get("id");
+    if (!orcId) {
+      orcId = "orc-" + Date.now().toString(36);
+      const url = new URL(window.location);
+      url.searchParams.set("id", orcId);
+      window.history.replaceState({}, "", url);
+    }
+
+    docRef = doc(db, "orcamentos", orcId);
+    setSyncStatus("syncing");
+
+    const snap = await getDoc(docRef);
+    if (snap.exists()) {
+      const data = snap.data();
+      state.suppliers = data.suppliers || state.suppliers;
+      state.items     = data.items     || state.items;
+      state.prices    = data.prices    || state.prices;
+      renderAll();
+    } else {
+      await setDoc(docRef, serializeState());
+    }
+
+    setSyncStatus("synced");
+    document.getElementById("setup-banner").style.display = "none";
+    toast("✅ Sincronizado com Firebase!", "success");
+  } catch (e) {
+    console.error("Firebase error:", e);
+    setSyncStatus("error");
+    toast("❌ Erro Firebase: " + e.message, "error");
+  }
+}
+
+function serializeState() {
+  return {
+    suppliers: state.suppliers,
+    items:     state.items,
+    prices:    state.prices,
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+async function saveToFirebase() {
+  if (!db || !docRef) return;
+  setSyncStatus("syncing");
+  try {
+    const { setDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    await setDoc(docRef, serializeState());
+    setSyncStatus("synced");
+  } catch (e) {
+    setSyncStatus("error");
+    toast("❌ Erro ao salvar: " + e.message, "error");
+  }
+}
+
+function saveToLocal() {
+  try {
+    localStorage.setItem("orcamento-state", JSON.stringify(serializeState()));
+  } catch(e) {}
+}
+
+function loadFromLocal() {
+  try {
+    const raw = localStorage.getItem("orcamento-state");
+    if (!raw) return false;
+    const data = JSON.parse(raw);
+    state.suppliers = data.suppliers || state.suppliers;
+    state.items     = data.items     || state.items;
+    state.prices    = data.prices    || state.prices;
+    return true;
+  } catch(e) { return false; }
+}
+
+// ============================================================
+//  SYNC STATUS UI
+// ============================================================
+function setSyncStatus(status) {
+  const dot   = document.getElementById("sync-dot");
+  const label = document.getElementById("sync-label");
+  dot.className = "sync-dot " + status;
+  label.textContent = { syncing: "Salvando…", synced: "Salvo", error: "Erro", "": "Local" }[status] || "Local";
+}
+
+// ============================================================
+//  TOAST
+// ============================================================
+function toast(msg, type = "") {
+  const c = document.getElementById("toast-container");
+  const el = document.createElement("div");
+  el.className = `toast ${type}`;
+  el.textContent = msg;
+  c.appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
+window.toast = toast;
+
+// ============================================================
+//  FORMAT CURRENCY
+// ============================================================
+function fmtCurrency(v) {
+  if (!v && v !== 0) return "";
+  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v);
+}
+
+function parseBRL(s) {
+  if (!s) return null;
+  const clean = s.replace(/[^\d,\.]/g, "").replace(",", ".");
+  const n = parseFloat(clean);
+  return isNaN(n) ? null : n;
+}
+
+// ============================================================
+//  RENDER ENGINE
+// ============================================================
+function renderAll() {
+  renderColHeaders();
+  renderTableBody();
+  renderTotals();
+  renderSummaryBar();
+  populateCategorySelect();
+}
+
+function renderColHeaders() {
+  const thead = document.getElementById("col-headers");
+  const nSup  = state.suppliers.length;
+
+  let html = `<tr>
+    <th style="min-width:100px">Item</th>
+    <th style="min-width:160px">Descrição</th>
+    <th style="min-width:60px; text-align:center">Unid.</th>
+    <th style="min-width:55px; text-align:center">Qtd.</th>`;
+
+  state.suppliers.forEach((sup, si) => {
+    html += `
+    <th colspan="2" class="price-col supplier-group">
+      <input class="supplier-name-input" id="sup-name-${si}"
+             value="${escHtml(sup)}"
+             onchange="updateSupplierName(${si}, this.value)"
+             placeholder="Fornecedor ${si+1}" />
+    </th>`;
+  });
+
+  html += `<th style="width:36px"></th></tr>
+
+  <tr>
+    <th></th><th></th><th></th><th></th>`;
+
+  state.suppliers.forEach((_, si) => {
+    html += `<th class="price-col" style="text-align:right; min-width:90px">Preço Unit.</th>
+             <th class="price-col" style="text-align:right; min-width:100px; color:var(--text-muted)">Total</th>`;
+  });
+  html += `<th></th></tr>`;
+
+  thead.innerHTML = html;
+}
+
+function renderTableBody() {
+  const tbody = document.getElementById("table-body");
+
+  // Group by category
+  const cats = {};
+  state.items.forEach(item => {
+    if (!cats[item.cat]) cats[item.cat] = [];
+    cats[item.cat].push(item);
+  });
+
+  let html = "";
+
+  Object.entries(cats).forEach(([cat, items]) => {
+    const meta   = CATEGORY_META[cat] || { id: 1, emoji: "📦", short: cat };
+    const catIdx = meta.id;
+    const isCollapsed = state.collapsed[cat];
+
+    // Category header row
+    html += `<tr class="cat-header cat-${catIdx}" data-cat="${escHtml(cat)}">
+      <td colspan="${4 + state.suppliers.length * 2 + 1}">
+        <span style="cursor:pointer; user-select:none" onclick="toggleCat('${escHtml(cat)}')">
+          ${isCollapsed ? "▶" : "▼"} ${meta.emoji} ${cat}
+          <span style="font-weight:400; opacity:0.7">(${items.length} itens)</span>
+        </span>
+      </td>
+    </tr>`;
+
+    if (!isCollapsed) {
+      items.forEach(item => {
+        // Find best (lowest non-zero) price
+        const itemPrices = state.suppliers.map((_, si) => {
+          const v = state.prices[`${item.id}-${si}`];
+          return (v && v > 0) ? v : null;
+        });
+        const nonNull = itemPrices.filter(p => p !== null);
+        const bestPrice = nonNull.length > 0 ? Math.min(...nonNull) : null;
+
+        html += `<tr class="item-row" data-item-id="${item.id}">
+          <td class="td-item">
+            <input class="editable-cell" style="min-width:100px; font-weight:600"
+                   value="${escHtml(item.name)}"
+                   onchange="updateItemField('${item.id}', 'name', this.value)" />
+          </td>
+          <td class="td-desc">
+            <input class="editable-cell" style="min-width:150px; font-size:12px"
+                   value="${escHtml(item.desc)}"
+                   onchange="updateItemField('${item.id}', 'desc', this.value)" />
+          </td>
+          <td class="td-unit">
+            <input class="editable-cell" style="width:56px; text-align:center; font-size:12px"
+                   value="${escHtml(item.unit)}"
+                   onchange="updateItemField('${item.id}', 'unit', this.value)" />
+          </td>
+          <td class="td-qty">
+            <input class="editable-cell" type="number" style="width:52px; text-align:center"
+                   value="${item.qty}"
+                   min="0" step="any"
+                   onchange="updateItemField('${item.id}', 'qty', parseFloat(this.value)||0)" />
+          </td>`;
+
+        state.suppliers.forEach((_, si) => {
+          const priceVal = state.prices[`${item.id}-${si}`] || 0;
+          const total    = (priceVal || 0) * (item.qty || 0);
+          const isBest   = bestPrice !== null && priceVal === bestPrice;
+
+          html += `<td class="td-price price-group${isBest ? " best-price" : ""}">
+            <input class="editable-cell price-input" type="text"
+                   id="price-${item.id}-${si}"
+                   value="${priceVal ? fmtCurrencyRaw(priceVal) : ""}"
+                   placeholder="R$ 0,00"
+                   inputmode="decimal"
+                   onchange="updatePrice('${item.id}', ${si}, this.value)"
+                   onfocus="this.select()" />
+          </td>
+          <td class="td-total${isBest ? " best-price" : ""}">
+            <span class="total-display" id="total-${item.id}-${si}">
+              ${total > 0 ? fmtCurrency(total) : '<span class="price-empty">—</span>'}
+            </span>
+          </td>`;
+        });
+
+        html += `<td class="td-actions">
+            <button class="btn-row-delete" onclick="deleteItem('${item.id}')" title="Remover item">✕</button>
+          </td>
+        </tr>`;
+      });
+    }
+  });
+
+  tbody.innerHTML = html;
+}
+
+function fmtCurrencyRaw(v) {
+  if (!v) return "";
+  return v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function renderTotals() {
+  const tfoot = document.getElementById("totals-foot");
+
+  const totals = state.suppliers.map((_, si) => {
+    return state.items.reduce((acc, item) => {
+      const p = state.prices[`${item.id}-${si}`] || 0;
+      return acc + p * (item.qty || 0);
+    }, 0);
+  });
+
+  const cheapestIdx = totals.indexOf(Math.min(...totals.filter(t => t > 0)));
+
+  let html = `<tr>
+    <td class="td-total-label" colspan="4">TOTAL GERAL</td>`;
+
+  state.suppliers.forEach((_, si) => {
+    const isCheapest = si === cheapestIdx && totals[si] > 0;
+    html += `
+    <td colspan="2" class="grand-total price-group${isCheapest ? " cheapest-col" : ""}">
+      ${totals[si] > 0 ? fmtCurrency(totals[si]) : "—"}
+      ${isCheapest ? '<span style="font-size:10px; margin-left:4px">✅ Menor</span>' : ""}
+    </td>`;
+  });
+
+  html += `<td></td></tr>`;
+  tfoot.innerHTML = html;
+}
+
+function renderSummaryBar() {
+  const bar = document.getElementById("summary-bar");
+
+  const totals = state.suppliers.map((sup, si) => {
+    const total = state.items.reduce((acc, item) => {
+      const p = state.prices[`${item.id}-${si}`] || 0;
+      return acc + p * (item.qty || 0);
+    }, 0);
+    const filled = state.items.filter(item => state.prices[`${item.id}-${si}`] > 0).length;
+    return { sup, si, total, filled };
+  });
+
+  const maxTotal = Math.max(...totals.map(t => t.total), 1);
+  const cheapest = totals.filter(t => t.total > 0).sort((a,b) => a.total - b.total)[0];
+
+  bar.innerHTML = totals.map(({ sup, si, total, filled }) => {
+    const isCheapest = cheapest && si === cheapest.si && total > 0;
+    const pct = total > 0 ? Math.round((total / maxTotal) * 100) : 0;
+    return `<div class="summary-card${isCheapest ? " cheapest" : ""}">
+      <div class="supplier-name">
+        ${escHtml(sup)}
+        ${isCheapest ? '<span class="badge-best">Menor</span>' : ""}
+      </div>
+      <div class="total-value">${total > 0 ? fmtCurrency(total) : "—"}</div>
+      <div class="items-filled">${filled} / ${state.items.length} itens cotados</div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+    </div>`;
+  }).join("");
+}
+
+// ============================================================
+//  CATEGORY SELECT
+// ============================================================
+function populateCategorySelect() {
+  const sel = document.getElementById("new-category");
+  const cats = [...new Set(state.items.map(i => i.cat))];
+  sel.innerHTML = cats.map(c => `<option value="${escHtml(c)}">${escHtml(c)}</option>`).join("");
+
+  // Add option to type new
+  sel.innerHTML += `<option value="__new__">+ Nova categoria…</option>`;
+}
+
+// ============================================================
+//  STATE UPDATERS
+// ============================================================
+window.updateSupplierName = function(si, val) {
+  state.suppliers[si] = val || `Fornecedor ${si+1}`;
+  renderSummaryBar();
+  scheduleSave();
+};
+
+window.updateItemField = function(id, field, val) {
+  const item = state.items.find(i => i.id === id);
+  if (!item) return;
+  item[field] = val;
+  if (field === "qty") { renderTotals(); renderSummaryBar(); }
+  scheduleSave();
+};
+
+window.updatePrice = function(id, si, rawVal) {
+  const val = parseBRL(rawVal);
+  const key = `${id}-${si}`;
+
+  if (val !== null && val > 0) {
+    state.prices[key] = val;
+  } else {
+    delete state.prices[key];
+  }
+
+  // Re-render input as formatted
+  const inp = document.getElementById(`price-${id}-${si}`);
+  if (inp && val > 0) inp.value = fmtCurrencyRaw(val);
+
+  // Update just this row's totals + highlighting
+  updateRowDisplay(id);
+  renderTotals();
+  renderSummaryBar();
+  scheduleSave();
+};
+
+function updateRowDisplay(itemId) {
+  const item = state.items.find(i => i.id === itemId);
+  if (!item) return;
+
+  const itemPrices = state.suppliers.map((_, si) => {
+    const v = state.prices[`${itemId}-${si}`];
+    return (v && v > 0) ? v : null;
+  });
+  const nonNull  = itemPrices.filter(p => p !== null);
+  const bestPrice = nonNull.length > 0 ? Math.min(...nonNull) : null;
+
+  state.suppliers.forEach((_, si) => {
+    const priceVal = state.prices[`${itemId}-${si}`] || 0;
+    const total    = priceVal * (item.qty || 0);
+    const isBest   = bestPrice !== null && priceVal === bestPrice;
+
+    // Update total display
+    const totalEl = document.getElementById(`total-${itemId}-${si}`);
+    if (totalEl) {
+      totalEl.innerHTML = total > 0 ? fmtCurrency(total) : '<span class="price-empty">—</span>';
+    }
+
+    // Update cell classes
+    const priceCell = document.getElementById(`price-${itemId}-${si}`)?.closest("td");
+    const totalCell = totalEl?.closest("td");
+    if (priceCell) priceCell.classList.toggle("best-price", isBest);
+    if (totalCell) totalCell.classList.toggle("best-price", isBest);
+    if (priceCell?.querySelector("input")) priceCell.querySelector("input").style.color = isBest ? "var(--green)" : "";
+    if (totalEl) totalEl.style.color = isBest ? "rgba(63,185,80,0.8)" : "";
+  });
+}
+
+// ============================================================
+//  COLLAPSE CATEGORIES
+// ============================================================
+window.toggleCat = function(cat) {
+  state.collapsed[cat] = !state.collapsed[cat];
+  renderTableBody();
+};
+
+window.expandAll  = function() { Object.keys(state.collapsed).forEach(k => state.collapsed[k] = false); renderTableBody(); };
+window.collapseAll = function() { [...new Set(state.items.map(i => i.cat))].forEach(c => state.collapsed[c] = true); renderTableBody(); };
+
+// ============================================================
+//  ADD / DELETE ITEM
+// ============================================================
+window.openAddItemModal  = function() {
+  document.getElementById("add-item-modal").classList.add("open");
+  populateCategorySelect();
+};
+window.closeAddItemModal = function() { document.getElementById("add-item-modal").classList.remove("open"); };
+
+window.addItem = function() {
+  const cat  = document.getElementById("new-category").value;
+  const name = document.getElementById("new-item-name").value.trim();
+  const desc = document.getElementById("new-item-desc").value.trim();
+  const unit = document.getElementById("new-item-unit").value.trim();
+  const qty  = parseFloat(document.getElementById("new-item-qty").value) || 0;
+
+  if (!name) { toast("⚠️ Nome do item é obrigatório", "error"); return; }
+
+  const newItem = {
+    id:   "i" + Date.now(),
+    cat:  cat === "__new__" ? "7. Outros" : cat,
+    name, desc, unit, qty
+  };
+
+  state.items.push(newItem);
+  renderAll();
+  closeAddItemModal();
+  scheduleSave();
+  toast("✅ Item adicionado!", "success");
+};
+
+window.deleteItem = function(id) {
+  if (!confirm("Remover este item do orçamento?")) return;
+  state.items = state.items.filter(i => i.id !== id);
+  // Clean up prices
+  state.suppliers.forEach((_, si) => delete state.prices[`${id}-${si}`]);
+  renderAll();
+  scheduleSave();
+  toast("🗑️ Item removido", "");
+};
+
+// ============================================================
+//  SAVE
+// ============================================================
+function scheduleSave() {
+  clearTimeout(saveTimeout);
+  saveTimeout = setTimeout(saveAll, 1500);
+}
+
+window.saveAll = async function() {
+  saveToLocal();
+  if (IS_FIREBASE_CONFIGURED) {
+    await saveToFirebase();
+  } else {
+    setSyncStatus("synced");
+    toast("💾 Salvo localmente!", "success");
+  }
+};
+
+// ============================================================
+//  EXPORT CSV
+// ============================================================
+window.exportCSV = function() {
+  const header = ["Categoria","Item","Descrição","Unid.","Qtd.",
+    ...state.suppliers.flatMap(s => [`Preço - ${s}`, `Total - ${s}`])
+  ];
+
+  const rows = state.items.map(item => {
+    const pricesCols = state.suppliers.flatMap((_, si) => {
+      const p = state.prices[`${item.id}-${si}`] || "";
+      const t = p ? (p * (item.qty||0)).toFixed(2) : "";
+      return [p, t];
+    });
+    return [item.cat, item.name, item.desc, item.unit, item.qty, ...pricesCols];
+  });
+
+  const csv = [header, ...rows]
+    .map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(";"))
+    .join("\n");
+
+  const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+  const url  = URL.createObjectURL(blob);
+  const a    = Object.assign(document.createElement("a"), { href: url, download: "orcamento.csv" });
+  a.click();
+  URL.revokeObjectURL(url);
+  toast("📊 CSV exportado!", "success");
+};
+
+// ============================================================
+//  PRINT
+// ============================================================
+window.printPage = function() { window.print(); };
+
+// ============================================================
+//  ESCAPE HTML
+// ============================================================
+function escHtml(str) {
+  return String(str || "")
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+}
+
+// ============================================================
+//  CLOSE MODAL ON BACKDROP CLICK
+// ============================================================
+document.getElementById("add-item-modal").addEventListener("click", function(e) {
+  if (e.target === this) closeAddItemModal();
+});
+
+// ============================================================
+//  INIT
+// ============================================================
+(async function init() {
+  state.items = JSON.parse(JSON.stringify(INITIAL_ITEMS));
+
+  // Try loading from local storage first
+  const gotLocal = loadFromLocal();
+
+  if (!gotLocal || state.items.length === 0) {
+    state.items = JSON.parse(JSON.stringify(INITIAL_ITEMS));
+  }
+
+  renderAll();
+
+  if (!IS_FIREBASE_CONFIGURED) {
+    setSyncStatus("");
+  } else {
+    document.getElementById("setup-banner").style.display = "none";
+    await initFirebase();
+  }
+})();
+</script>
+</body>
+</html>
