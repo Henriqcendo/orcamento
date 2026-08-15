@@ -703,13 +703,248 @@
     }
 
     /* =========================================================
-       PRINT STYLES
+       PRINT DROPDOWN
+    ========================================================= */
+    .print-menu-wrap {
+      position: relative;
+    }
+
+    .print-dropdown {
+      display: none;
+      position: absolute;
+      top: calc(100% + 6px);
+      right: 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      min-width: 220px;
+      z-index: 150;
+      overflow: hidden;
+      animation: fadeInDown 0.15s ease;
+    }
+
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .print-dropdown.open { display: block; }
+
+    .print-dropdown-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 12px 14px;
+      background: none;
+      border: none;
+      width: 100%;
+      text-align: left;
+      cursor: pointer;
+      font-family: var(--font);
+      color: var(--text);
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .print-dropdown-item:last-child { border-bottom: none; }
+    .print-dropdown-item:hover { background: var(--surface2); }
+
+    .print-dropdown-item .pdi-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+    .print-dropdown-item .pdi-text strong { display: block; font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+    .print-dropdown-item .pdi-text span   { font-size: 11px; color: var(--text-muted); line-height: 1.4; }
+
+    /* =========================================================
+       PRINT HEADER (only shown when printing)
+    ========================================================= */
+    .print-header {
+      display: none;
+      padding: 0 0 12px;
+      border-bottom: 2px solid #000;
+      margin-bottom: 14px;
+    }
+
+    .print-header .ph-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .print-header h2 {
+      font-size: 18px;
+      font-weight: 800;
+      color: #000;
+      margin-bottom: 2px;
+    }
+
+    .print-header .ph-sub {
+      font-size: 12px;
+      color: #555;
+    }
+
+    .print-header .ph-date {
+      font-size: 12px;
+      color: #333;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .print-blank-notice {
+      display: none;
+      background: #fff3cd;
+      border: 1px solid #856404;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 11px;
+      color: #664d03;
+      margin-top: 8px;
+      font-weight: 600;
+    }
+
+    /* =========================================================
+       PRINT STYLES — BASE
     ========================================================= */
     @media print {
-      header, .toolbar, .summary-bar, .btn-row-delete, .td-actions, .setup-banner { display: none !important; }
-      body { background: #fff; color: #000; }
-      table { min-width: unset; }
-      .editable-cell { border: none; }
+      /* Hide all UI chrome */
+      .header-actions, .toolbar, .summary-bar,
+      .btn-row-delete, .td-actions, .setup-banner,
+      #toast-container, #add-item-modal,
+      .print-menu-wrap { display: none !important; }
+
+      /* Show print header */
+      .print-header { display: block !important; }
+
+      /* Logo area visible but static */
+      header {
+        position: static !important;
+        background: transparent !important;
+        border-bottom: none !important;
+        padding: 0 0 8px !important;
+        box-shadow: none !important;
+      }
+
+      body {
+        background: #fff !important;
+        color: #000 !important;
+        font-size: 11px;
+      }
+
+      table {
+        min-width: unset !important;
+        width: 100% !important;
+        border-collapse: collapse !important;
+        font-size: 11px;
+      }
+
+      /* Editable cells: plain text */
+      .editable-cell {
+        border: none !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        color: #000 !important;
+        padding: 2px 4px !important;
+        font-size: 11px;
+      }
+
+      .price-input { text-align: right !important; font-weight: 600 !important; }
+
+      /* Category headers: keep color */
+      .cat-1 td, .cat-2 td, .cat-3 td,
+      .cat-4 td, .cat-5 td, .cat-6 td {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        font-size: 10px;
+        padding: 6px 10px !important;
+      }
+
+      /* Table cells */
+      tbody.items-body td {
+        padding: 5px 8px !important;
+        border-bottom: 1px solid #ddd !important;
+        vertical-align: middle !important;
+      }
+
+      thead.col-headers th {
+        background: #f0f0f0 !important;
+        color: #000 !important;
+        border-bottom: 2px solid #000 !important;
+        padding: 6px 8px !important;
+        font-size: 10px;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      tfoot.totals-foot tr td {
+        background: #f5f5f5 !important;
+        color: #000 !important;
+        border-top: 2px solid #000 !important;
+        position: static !important;
+        font-size: 12px;
+        padding: 8px !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      .grand-total { color: #000 !important; }
+      .grand-total.cheapest-col { color: #1a6b2e !important; }
+
+      /* Best price highlight */
+      td.best-price {
+        background: #e8f5e9 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      .total-display { color: #000 !important; font-size: 11px; }
+      .price-group { border-left: 1px solid #ccc !important; }
+
+      @page { margin: 14mm 10mm; }
+    }
+
+    /* =========================================================
+       PRINT STYLES — BLANK FORM MODE
+    ========================================================= */
+    @media print {
+      /* Notice banner */
+      body.print-blank .print-blank-notice { display: block !important; }
+
+      /* Price cells: empty underlined box */
+      body.print-blank td.td-price {
+        border-bottom: 2px solid #333 !important;
+        background: transparent !important;
+      }
+      body.print-blank td.td-price::after {
+        content: "R$" !important;
+        color: #999 !important;
+        font-size: 9px !important;
+        float: left !important;
+      }
+
+      /* Total cells: empty underlined box */
+      body.print-blank td.td-total {
+        border-bottom: 2px solid #333 !important;
+        background: transparent !important;
+      }
+
+      /* Grand totals: underlined boxes */
+      body.print-blank .grand-total {
+        border-bottom: 2px solid #000 !important;
+        min-width: 100px;
+        display: inline-block;
+      }
+
+      /* Remove best-price green in blank mode */
+      body.print-blank td.best-price {
+        background: transparent !important;
+      }
+
+      /* Supplier name header: underline hint */
+      body.print-blank .supplier-name-input {
+        border-bottom: 1px solid #555 !important;
+        color: #000 !important;
+      }
     }
 
     /* =========================================================
@@ -744,13 +979,50 @@
         <div class="sync-dot" id="sync-dot"></div>
         <span id="sync-label">Local</span>
       </div>
-      <button class="btn btn-ghost btn-icon" onclick="printPage()" title="Imprimir / PDF">🖨️</button>
+      <!-- Print dropdown -->
+      <div class="print-menu-wrap" id="print-menu-wrap">
+        <button class="btn btn-ghost" id="print-menu-btn" onclick="togglePrintMenu()" title="Imprimir">
+          🖨️ <span>Imprimir ▾</span>
+        </button>
+        <div class="print-dropdown" id="print-dropdown">
+          <button class="print-dropdown-item" onclick="printFilled()">
+            <span class="pdi-icon">📄</span>
+            <span class="pdi-text">
+              <strong>Com dados preenchidos</strong>
+              <span>Imprime todos os valores já digitados</span>
+            </span>
+          </button>
+          <button class="print-dropdown-item" onclick="printBlank()">
+            <span class="pdi-icon">📋</span>
+            <span class="pdi-text">
+              <strong>Formulário para caneta</strong>
+              <span>Lacunas em branco para preencher à mão</span>
+            </span>
+          </button>
+        </div>
+      </div>
       <button class="btn btn-primary" onclick="saveAll()">
         <span>💾</span><span>Salvar</span>
       </button>
     </div>
   </div>
 </header>
+
+<!-- ============================================================
+     PRINT HEADER (only visible when printing)
+============================================================ -->
+<div class="print-header" id="print-header">
+  <div class="ph-top">
+    <div>
+      <h2>🏗️ Orçamento de Obra — Cotação de Materiais</h2>
+      <div class="ph-sub" id="print-sub">Cotação de Materiais de Construção</div>
+    </div>
+    <div class="ph-date" id="print-date-display"></div>
+  </div>
+  <div class="print-blank-notice" id="print-blank-notice">
+    📋 FORMULÁRIO PARA PREENCHIMENTO MANUAL — Preencha os preços com caneta nos campos em branco
+  </div>
+</div>
 
 <!-- ============================================================
      FIREBASE SETUP BANNER (hidden when configured)
@@ -1453,7 +1725,74 @@ window.exportCSV = function() {
 // ============================================================
 //  PRINT
 // ============================================================
-window.printPage = function() { window.print(); };
+// ============================================================
+//  PRINT FUNCTIONS
+// ============================================================
+function setPrintDate() {
+  const now = new Date();
+  const fmt  = now.toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric' });
+  const fmtH = now.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
+  const el = document.getElementById('print-date-display');
+  if (el) el.innerHTML = `<strong>Data:</strong> ${fmt}<br><strong>Hora:</strong> ${fmtH}`;
+}
+
+window.togglePrintMenu = function() {
+  const dd = document.getElementById('print-dropdown');
+  dd.classList.toggle('open');
+};
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(e) {
+  const wrap = document.getElementById('print-menu-wrap');
+  if (wrap && !wrap.contains(e.target)) {
+    const dd = document.getElementById('print-dropdown');
+    if (dd) dd.classList.remove('open');
+  }
+});
+
+window.printFilled = function() {
+  document.getElementById('print-dropdown').classList.remove('open');
+  document.body.classList.remove('print-blank');
+  document.getElementById('print-blank-notice').style.display = 'none';
+  setPrintDate();
+  setTimeout(() => window.print(), 80);
+};
+
+window.printBlank = function() {
+  document.getElementById('print-dropdown').classList.remove('open');
+  setPrintDate();
+
+  // Snapshot all price inputs and total displays
+  const priceInputs = [...document.querySelectorAll('.price-input')];
+  const totalDisplays = [...document.querySelectorAll('.total-display')];
+  const storedPrices = priceInputs.map(el => el.value);
+  const storedTotals = totalDisplays.map(el => el.innerHTML);
+
+  // Clear them all for blank-form print
+  priceInputs.forEach(el => { el.value = ''; });
+  totalDisplays.forEach(el => { el.innerHTML = ''; });
+
+  // Also clear the grand-total cells text
+  const grandTotals = [...document.querySelectorAll('.grand-total')];
+  const storedGrand = grandTotals.map(el => el.innerHTML);
+  grandTotals.forEach(el => { el.innerHTML = '&nbsp;'; });
+
+  document.body.classList.add('print-blank');
+
+  setTimeout(() => {
+    window.print();
+    // Restore after a short delay (enough for print dialog to open)
+    setTimeout(() => {
+      priceInputs.forEach((el, i) => { el.value = storedPrices[i]; });
+      totalDisplays.forEach((el, i) => { el.innerHTML = storedTotals[i]; });
+      grandTotals.forEach((el, i) => { el.innerHTML = storedGrand[i]; });
+      document.body.classList.remove('print-blank');
+    }, 1200);
+  }, 80);
+};
+
+// Legacy fallback
+window.printPage = window.printFilled;
 
 // ============================================================
 //  ESCAPE HTML
