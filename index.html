@@ -852,12 +852,12 @@
 //  Obtenha em: console.firebase.google.com → Configurações do projeto
 // ============================================================
 const FIREBASE_CONFIG = {
-  apiKey:            "SUA_API_KEY_AQUI",
-  authDomain:        "SEU_PROJETO.firebaseapp.com",
-  projectId:         "SEU_PROJETO_ID",
-  storageBucket:     "SEU_PROJETO.appspot.com",
-  messagingSenderId: "SEU_SENDER_ID",
-  appId:             "SEU_APP_ID"
+  apiKey:            "AIzaSyD6Ia5MRnCdTL0m5Ut1M5L3Ar0Yb3ihiVc",
+  authDomain:        "orcamento-8b904.firebaseapp.com",
+  projectId:         "orcamento-8b904",
+  storageBucket:     "orcamento-8b904.firebasestorage.app",
+  messagingSenderId: "777526858495",
+  appId:             "1:777526858495:web:1aebe23a77a3f4602672ca"
 };
 
 const IS_FIREBASE_CONFIGURED = !FIREBASE_CONFIG.apiKey.startsWith("SUA_");
@@ -1042,7 +1042,15 @@ function fmtCurrency(v) {
 
 function parseBRL(s) {
   if (!s) return null;
-  const clean = s.replace(/[^\d,\.]/g, "").replace(",", ".");
+  // Handle pt-BR format: "1.234,56" → 1234.56  or  "1234,56" → 1234.56
+  let clean = s.replace(/[^\d,\.]/g, "");
+  // If contains both dot and comma, dot is thousands separator
+  if (clean.includes(".") && clean.includes(",")) {
+    clean = clean.replace(/\./g, "").replace(",", ".");
+  } else {
+    // Only comma → decimal separator
+    clean = clean.replace(",", ".");
+  }
   const n = parseFloat(clean);
   return isNaN(n) ? null : n;
 }
@@ -1149,6 +1157,7 @@ function renderTableBody() {
             <input class="editable-cell" type="number" style="width:52px; text-align:center"
                    value="${item.qty}"
                    min="0" step="any"
+                   oninput="updateItemField('${item.id}', 'qty', parseFloat(this.value)||0)"
                    onchange="updateItemField('${item.id}', 'qty', parseFloat(this.value)||0)" />
           </td>`;
 
@@ -1163,6 +1172,7 @@ function renderTableBody() {
                    value="${priceVal ? fmtCurrencyRaw(priceVal) : ""}"
                    placeholder="R$ 0,00"
                    inputmode="decimal"
+                   oninput="updatePrice('${item.id}', ${si}, this.value)"
                    onchange="updatePrice('${item.id}', ${si}, this.value)"
                    onfocus="this.select()" />
           </td>
@@ -1272,7 +1282,12 @@ window.updateItemField = function(id, field, val) {
   const item = state.items.find(i => i.id === id);
   if (!item) return;
   item[field] = val;
-  if (field === "qty") { renderTotals(); renderSummaryBar(); }
+  if (field === "qty") {
+    // Update every row cell total for this item immediately
+    updateRowDisplay(id);
+    renderTotals();
+    renderSummaryBar();
+  }
   scheduleSave();
 };
 
@@ -1286,15 +1301,20 @@ window.updatePrice = function(id, si, rawVal) {
     delete state.prices[key];
   }
 
-  // Re-render input as formatted
-  const inp = document.getElementById(`price-${id}-${si}`);
-  if (inp && val > 0) inp.value = fmtCurrencyRaw(val);
-
-  // Update just this row's totals + highlighting
+  // Update this row's totals + highlighting (no full re-render)
   updateRowDisplay(id);
   renderTotals();
   renderSummaryBar();
   scheduleSave();
+};
+
+// Called on blur to format the price input nicely
+window.formatPriceInput = function(id, si) {
+  const inp = document.getElementById(`price-${id}-${si}`);
+  if (!inp) return;
+  const val = state.prices[`${id}-${si}`];
+  if (val && val > 0) inp.value = fmtCurrencyRaw(val);
+  else inp.value = "";
 };
 
 function updateRowDisplay(itemId) {
