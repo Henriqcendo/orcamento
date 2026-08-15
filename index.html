@@ -910,58 +910,40 @@
       /* Notice banner */
       body.print-blank .print-blank-notice { display: block !important; }
 
-      /* === ALL editable text cells: show as underlined blank boxes === */
-
-      /* Item name, description, unit, qty cells */
-      body.print-blank .editable-cell {
-        color: transparent !important;   /* hide the typed value */
-        border-bottom: 1.5px solid #555 !important;
-        border-radius: 0 !important;
-        background: transparent !important;
-      }
-
-      /* Supplier name inputs in header */
-      body.print-blank .supplier-name-input {
-        color: transparent !important;
-        border-bottom: 1.5px solid #555 !important;
-        background: transparent !important;
-      }
-
-      /* Price cells: thicker underline + R$ hint on left */
+      /* Price cells: empty underlined box */
       body.print-blank td.td-price {
         border-bottom: 2px solid #333 !important;
         background: transparent !important;
       }
       body.print-blank td.td-price::after {
         content: "R$" !important;
-        color: #bbb !important;
-        font-size: 8px !important;
+        color: #999 !important;
+        font-size: 9px !important;
         float: left !important;
       }
 
-      /* Total cells */
+      /* Total cells: empty underlined box */
       body.print-blank td.td-total {
         border-bottom: 2px solid #333 !important;
         background: transparent !important;
       }
 
-      /* Grand totals */
+      /* Grand totals: underlined boxes */
       body.print-blank .grand-total {
         border-bottom: 2px solid #000 !important;
         min-width: 100px;
         display: inline-block;
-        color: transparent !important;
       }
 
-      /* Remove best-price highlight */
+      /* Remove best-price green in blank mode */
       body.print-blank td.best-price {
         background: transparent !important;
       }
 
-      /* Category headers: keep visible (user needs to know the categories) */
-      body.print-blank .cat-header td {
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
+      /* Supplier name header: underline hint */
+      body.print-blank .supplier-name-input {
+        border-bottom: 1px solid #555 !important;
+        color: #000 !important;
       }
     }
 
@@ -1981,47 +1963,31 @@ window.printBlank = function() {
   document.getElementById('print-dropdown').classList.remove('open');
   setPrintDate();
 
-  // ---- Snapshot EVERYTHING ----
-  // 1. All regular editable cells (name, desc, unit, qty)
-  const editableCells = [...document.querySelectorAll('.editable-cell:not(.price-input)')];
-  const storedEditable = editableCells.map(el => el.value);
-
-  // 2. Supplier name inputs in header
-  const supNames = [...document.querySelectorAll('.supplier-name-input')];
-  const storedSupNames = supNames.map(el => el.value);
-
-  // 3. Price inputs
-  const priceInputs = [...document.querySelectorAll('.price-input')];
-  const storedPrices = priceInputs.map(el => el.value);
-
-  // 4. Row total displays
+  // Snapshot somente os campos de valores
+  const priceInputs   = [...document.querySelectorAll('.price-input')];
   const totalDisplays = [...document.querySelectorAll('.total-display')];
+  const grandTotals   = [...document.querySelectorAll('.grand-total')];
+
+  const storedPrices = priceInputs.map(el   => el.value);
   const storedTotals = totalDisplays.map(el => el.innerHTML);
+  const storedGrand  = grandTotals.map(el   => el.innerHTML);
 
-  // 5. Grand total footer cells
-  const grandTotals = [...document.querySelectorAll('.grand-total')];
-  const storedGrand = grandTotals.map(el => el.innerHTML);
-
-  // ---- Clear EVERYTHING ----
-  editableCells.forEach(el  => { el.value = ''; });
-  supNames.forEach(el       => { el.value = ''; });
-  priceInputs.forEach(el    => { el.value = ''; });
-  totalDisplays.forEach(el  => { el.innerHTML = ''; });
-  grandTotals.forEach(el    => { el.innerHTML = '&nbsp;'; });
+  // Limpa apenas os valores monétarios
+  priceInputs.forEach(el   => { el.value = ''; });
+  totalDisplays.forEach(el => { el.innerHTML = ''; });
+  grandTotals.forEach(el   => { el.innerHTML = '&nbsp;'; });
 
   document.body.classList.add('print-blank');
 
   setTimeout(() => {
     window.print();
-    // Restore all values after the print dialog opens
+    // Restaura tudo após o diálogo de impressão abrir
     setTimeout(() => {
-      editableCells.forEach((el, i) => { el.value = storedEditable[i]; });
-      supNames.forEach((el, i)      => { el.value = storedSupNames[i]; });
       priceInputs.forEach((el, i)   => { el.value = storedPrices[i]; });
       totalDisplays.forEach((el, i) => { el.innerHTML = storedTotals[i]; });
       grandTotals.forEach((el, i)   => { el.innerHTML = storedGrand[i]; });
       document.body.classList.remove('print-blank');
-    }, 1500);
+    }, 1200);
   }, 80);
 };
 
