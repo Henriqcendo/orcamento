@@ -848,19 +848,20 @@
 ============================================================ -->
 <script type="module">
 // ============================================================
-//  FIREBASE CONFIG — substitua os valores abaixo pelas suas credenciais
-//  Obtenha em: console.firebase.google.com → Configurações do projeto
+//  FIREBASE CONFIG
 // ============================================================
 const FIREBASE_CONFIG = {
   apiKey:            "AIzaSyD6Ia5MRnCdTL0m5Ut1M5L3Ar0Yb3ihiVc",
   authDomain:        "orcamento-8b904.firebaseapp.com",
+  databaseURL:       "https://orcamento-8b904-default-rtdb.firebaseio.com",
   projectId:         "orcamento-8b904",
   storageBucket:     "orcamento-8b904.firebasestorage.app",
   messagingSenderId: "777526858495",
-  appId:             "1:777526858495:web:1aebe23a77a3f4602672ca"
+  appId:             "1:777526858495:web:1aebe23a77a3f4602672ca",
+  measurementId:     "G-LMHD79YVK8"
 };
 
-const IS_FIREBASE_CONFIGURED = !FIREBASE_CONFIG.apiKey.startsWith("SUA_");
+const IS_FIREBASE_CONFIGURED = true; // credenciais configuradas
 
 // ============================================================
 //  APP STATE
@@ -921,20 +922,19 @@ const INITIAL_ITEMS = [
 ];
 
 // ============================================================
-//  FIREBASE HELPERS
+//  FIREBASE REALTIME DATABASE HELPERS
 // ============================================================
-let db = null;
-let docRef = null;
+let rtdb       = null;   // database instance
+let orcPath    = null;   // path string e.g. "orcamentos/orc-abc123"
 let saveTimeout = null;
 
 async function initFirebase() {
-  if (!IS_FIREBASE_CONFIGURED) return;
   try {
-    const { initializeApp }       = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
-    const { getFirestore, doc, getDoc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    const { initializeApp }                        = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
+    const { getDatabase, ref, get, set, child }    = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js");
 
     const app = initializeApp(FIREBASE_CONFIG);
-    db = getFirestore(app);
+    rtdb = getDatabase(app);
 
     // Use URL param 'id' or generate new one
     let orcId = new URLSearchParams(window.location.search).get("id");
@@ -945,23 +945,24 @@ async function initFirebase() {
       window.history.replaceState({}, "", url);
     }
 
-    docRef = doc(db, "orcamentos", orcId);
+    orcPath = "orcamentos/" + orcId;
     setSyncStatus("syncing");
 
-    const snap = await getDoc(docRef);
+    const snap = await get(ref(rtdb, orcPath));
     if (snap.exists()) {
-      const data = snap.data();
-      state.suppliers = data.suppliers || state.suppliers;
-      state.items     = data.items     || state.items;
-      state.prices    = data.prices    || state.prices;
+      const data = snap.val();
+      if (data.suppliers) state.suppliers = data.suppliers;
+      if (data.items)     state.items     = data.items;
+      if (data.prices)    state.prices    = data.prices;
       renderAll();
     } else {
-      await setDoc(docRef, serializeState());
+      // First time: save initial state
+      await set(ref(rtdb, orcPath), serializeState());
     }
 
     setSyncStatus("synced");
     document.getElementById("setup-banner").style.display = "none";
-    toast("✅ Sincronizado com Firebase!", "success");
+    toast("✅ Firebase conectado!", "success");
   } catch (e) {
     console.error("Firebase error:", e);
     setSyncStatus("error");
@@ -979,13 +980,14 @@ function serializeState() {
 }
 
 async function saveToFirebase() {
-  if (!db || !docRef) return;
+  if (!rtdb || !orcPath) return;
   setSyncStatus("syncing");
   try {
-    const { setDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-    await setDoc(docRef, serializeState());
+    const { ref, set } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js");
+    await set(ref(rtdb, orcPath), serializeState());
     setSyncStatus("synced");
   } catch (e) {
+    console.error("Erro ao salvar:", e);
     setSyncStatus("error");
     toast("❌ Erro ao salvar: " + e.message, "error");
   }
