@@ -948,6 +948,89 @@
     }
 
     /* =========================================================
+       SUPPLIER CONTROL BUTTONS & COLLAPSED COLUMN
+    ========================================================= */
+    .sup-ctrl-btn {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      border-radius: 4px;
+      width: 22px;
+      height: 22px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      cursor: pointer;
+      font-family: var(--font);
+      line-height: 1;
+      transition: all 0.15s;
+      padding: 0;
+      flex-shrink: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .sup-ctrl-btn:hover { background: var(--surface2); color: var(--text); }
+
+    .sup-ctrl-del { }
+    .sup-ctrl-del:hover { color: var(--red) !important; border-color: rgba(248,81,73,0.4) !important; }
+
+    .sup-ctrl-add {
+      width: 28px; height: 28px;
+      background: rgba(63,185,80,0.12);
+      border-color: rgba(63,185,80,0.35);
+      color: var(--green);
+      font-size: 18px;
+    }
+    .sup-ctrl-add:hover { background: rgba(63,185,80,0.25) !important; color: var(--green) !important; }
+
+    .add-sup-th {
+      width: 40px;
+      text-align: center !important;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .add-sup-th:hover { background: rgba(63,185,80,0.07); }
+
+    /* Collapsed supplier column */
+    .sup-col-collapsed {
+      width: 28px !important;
+      min-width: 28px !important;
+      max-width: 28px !important;
+      padding: 4px 2px !important;
+      text-align: center !important;
+      cursor: pointer;
+      transition: background 0.15s;
+      border-left: 2px solid var(--border) !important;
+    }
+    .sup-col-collapsed:hover { background: rgba(88,166,255,0.08); }
+
+    .collapsed-sup-label {
+      display: block;
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--text-muted);
+      padding: 4px 0;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+      overflow: hidden;
+      max-height: 52px;
+      text-overflow: ellipsis;
+    }
+
+    .collapsed-sup-expand {
+      display: block;
+      font-size: 8px;
+      color: var(--accent);
+      margin-top: 2px;
+    }
+
+    .sup-col-data {
+      background: rgba(88,166,255,0.03);
+    }
+
+    /* =========================================================
        CATEGORY INDICATOR STRIP
     ========================================================= */
     .cat-strip {
@@ -1048,6 +1131,10 @@
 <div class="toolbar">
   <button class="btn btn-ghost" onclick="openAddItemModal()">
     ➕ <span>Novo Item</span>
+  </button>
+  <div class="toolbar-sep"></div>
+  <button class="btn btn-ghost" onclick="addSupplier()">
+    🏪 <span>+ Fornecedor</span>
   </button>
   <div class="toolbar-sep"></div>
   <button class="btn btn-ghost" onclick="expandAll()">📂 <span>Expandir</span></button>
@@ -1152,8 +1239,9 @@ const CATEGORY_META = {
 let state = {
   suppliers: [...DEFAULT_SUPPLIERS],
   items: [],
-  prices: {},       // key: `${itemId}-${supplierIdx}`, value: number
-  collapsed: {},    // key: category, value: bool
+  prices: {},          // key: `${itemId}-${supplierIdx}`, value: number
+  collapsed: {},       // key: category, value: bool
+  hiddenSuppliers: {}, // key: supplier index, value: bool (minimized)
 };
 
 // ============================================================
@@ -1223,9 +1311,10 @@ async function initFirebase() {
     const snap = await get(ref(rtdb, orcPath));
     if (snap.exists()) {
       const data = snap.val();
-      if (data.suppliers) state.suppliers = data.suppliers;
-      if (data.items)     state.items     = data.items;
-      if (data.prices)    state.prices    = data.prices;
+      if (data.suppliers)       state.suppliers       = data.suppliers;
+      if (data.items)           state.items           = data.items;
+      if (data.prices)          state.prices          = data.prices;
+      if (data.hiddenSuppliers) state.hiddenSuppliers = data.hiddenSuppliers;
       renderAll();
     } else {
       // First time: save initial state
@@ -1244,10 +1333,11 @@ async function initFirebase() {
 
 function serializeState() {
   return {
-    suppliers: state.suppliers,
-    items:     state.items,
-    prices:    state.prices,
-    updatedAt: new Date().toISOString(),
+    suppliers:       state.suppliers,
+    items:           state.items,
+    prices:          state.prices,
+    hiddenSuppliers: state.hiddenSuppliers,
+    updatedAt:       new Date().toISOString(),
   };
 }
 
@@ -1276,9 +1366,10 @@ function loadFromLocal() {
     const raw = localStorage.getItem("orcamento-state");
     if (!raw) return false;
     const data = JSON.parse(raw);
-    state.suppliers = data.suppliers || state.suppliers;
-    state.items     = data.items     || state.items;
-    state.prices    = data.prices    || state.prices;
+    state.suppliers       = data.suppliers       || state.suppliers;
+    state.items           = data.items           || state.items;
+    state.prices          = data.prices          || state.prices;
+    state.hiddenSuppliers = data.hiddenSuppliers || state.hiddenSuppliers;
     return true;
   } catch(e) { return false; }
 }
@@ -1340,10 +1431,16 @@ function renderAll() {
   populateCategorySelect();
 }
 
+// Helper: total column count for colspan
+function totalColCount() {
+  const supCols = state.suppliers.reduce((a, _, si) => a + (state.hiddenSuppliers[si] ? 1 : 2), 0);
+  return 4 + supCols + 2; // 4 base + supplier cols + actions col + add-sup col
+}
+
 function renderColHeaders() {
   const thead = document.getElementById("col-headers");
-  const nSup  = state.suppliers.length;
 
+  // Row 1: supplier group headers
   let html = `<tr>
     <th style="min-width:100px">Item</th>
     <th style="min-width:160px">Descrição</th>
@@ -1351,25 +1448,52 @@ function renderColHeaders() {
     <th style="min-width:55px; text-align:center">Qtd.</th>`;
 
   state.suppliers.forEach((sup, si) => {
-    html += `
-    <th colspan="2" class="price-col supplier-group">
-      <input class="supplier-name-input" id="sup-name-${si}"
-             value="${escHtml(sup)}"
-             onchange="updateSupplierName(${si}, this.value)"
-             placeholder="Fornecedor ${si+1}" />
-    </th>`;
+    const isHidden = state.hiddenSuppliers[si];
+    if (isHidden) {
+      // Collapsed: single narrow column with expand trigger
+      html += `
+      <th class="price-col sup-col-collapsed" title="${escHtml(sup)} — clique para expandir" onclick="toggleSupplier(${si})">
+        <span class="collapsed-sup-label">${escHtml(sup.slice(0,6))}</span>
+        <span class="collapsed-sup-expand">▶</span>
+      </th>`;
+    } else {
+      // Expanded: 2-column group with controls
+      html += `
+      <th colspan="2" class="price-col supplier-group">
+        <div style="display:flex;align-items:center;gap:5px;justify-content:center">
+          <input class="supplier-name-input" id="sup-name-${si}"
+                 value="${escHtml(sup)}"
+                 onchange="updateSupplierName(${si}, this.value)"
+                 placeholder="Fornecedor ${si+1}"
+                 style="flex:1;min-width:80px" />
+          <button class="sup-ctrl-btn" onclick="toggleSupplier(${si})" title="Minimizar fornecedor">−</button>
+          ${state.suppliers.length > 1
+            ? `<button class="sup-ctrl-btn sup-ctrl-del" onclick="removeSupplier(${si})" title="Remover fornecedor">✕</button>`
+            : ''}
+        </div>
+      </th>`;
+    }
   });
 
-  html += `<th style="width:36px"></th></tr>
+  // + Add supplier column header
+  html += `
+    <th class="price-col add-sup-th" title="Adicionar fornecedor" onclick="addSupplier()">
+      <button class="sup-ctrl-btn sup-ctrl-add">＋</button>
+    </th>
+    <th style="width:36px"></th>
+  </tr>`;
 
-  <tr>
-    <th></th><th></th><th></th><th></th>`;
-
+  // Row 2: sub-headers (Preço Unit. / Total) per visible supplier
+  html += `<tr><th></th><th></th><th></th><th></th>`;
   state.suppliers.forEach((_, si) => {
-    html += `<th class="price-col" style="text-align:right; min-width:90px">Preço Unit.</th>
-             <th class="price-col" style="text-align:right; min-width:100px; color:var(--text-muted)">Total</th>`;
+    if (state.hiddenSuppliers[si]) {
+      html += `<th class="price-col sup-col-collapsed" style="width:28px"></th>`;
+    } else {
+      html += `<th class="price-col" style="text-align:right;min-width:90px">Preço Unit.</th>
+               <th class="price-col" style="text-align:right;min-width:100px;color:var(--text-muted)">Total</th>`;
+    }
   });
-  html += `<th></th></tr>`;
+  html += `<th></th><th></th></tr>`;
 
   thead.innerHTML = html;
 }
@@ -1393,7 +1517,7 @@ function renderTableBody() {
 
     // Category header row
     html += `<tr class="cat-header cat-${catIdx}" data-cat="${escHtml(cat)}">
-      <td colspan="${4 + state.suppliers.length * 2 + 1}">
+      <td colspan="${totalColCount()}">
         <span style="cursor:pointer; user-select:none" onclick="toggleCat('${escHtml(cat)}')">
           ${isCollapsed ? "▶" : "▼"} ${meta.emoji} ${cat}
           <span style="font-weight:400; opacity:0.7">(${items.length} itens)</span>
@@ -1436,6 +1560,14 @@ function renderTableBody() {
           </td>`;
 
         state.suppliers.forEach((_, si) => {
+          if (state.hiddenSuppliers[si]) {
+            // Collapsed supplier: show single narrow cell with expand indicator
+            html += `<td class="sup-col-collapsed sup-col-data" onclick="toggleSupplier(${si})" title="${escHtml(state.suppliers[si])} — clique para expandir">
+              <span style="font-size:9px;color:var(--border-light)">▶</span>
+            </td>`;
+            return;
+          }
+
           const priceVal = state.prices[`${item.id}-${si}`] || 0;
           const total    = (priceVal || 0) * (item.qty || 0);
           const isBest   = bestPrice !== null && priceVal === bestPrice;
@@ -1460,6 +1592,7 @@ function renderTableBody() {
         html += `<td class="td-actions">
             <button class="btn-row-delete" onclick="deleteItem('${item.id}')" title="Remover item">✕</button>
           </td>
+          <td style="width:36px"></td>
         </tr>`;
       });
     }
@@ -1485,19 +1618,24 @@ function renderTotals() {
 
   const cheapestIdx = totals.indexOf(Math.min(...totals.filter(t => t > 0)));
 
-  let html = `<tr>
-    <td class="td-total-label" colspan="4">TOTAL GERAL</td>`;
+  let html = `<tr><td class="td-total-label" colspan="4">TOTAL GERAL</td>`;
 
   state.suppliers.forEach((_, si) => {
+    if (state.hiddenSuppliers[si]) {
+      // Collapsed: show a narrow cell
+      html += `<td class="sup-col-collapsed price-group" onclick="toggleSupplier(${si})"
+                   title="${escHtml(state.suppliers[si])} — expandir" style="cursor:pointer"></td>`;
+      return;
+    }
     const isCheapest = si === cheapestIdx && totals[si] > 0;
     html += `
     <td colspan="2" class="grand-total price-group${isCheapest ? " cheapest-col" : ""}">
       ${totals[si] > 0 ? fmtCurrency(totals[si]) : "—"}
-      ${isCheapest ? '<span style="font-size:10px; margin-left:4px">✅ Menor</span>' : ""}
+      ${isCheapest ? '<span style="font-size:10px;margin-left:4px">✅ Menor</span>' : ""}
     </td>`;
   });
 
-  html += `<td></td></tr>`;
+  html += `<td></td><td></td></tr>`;
   tfoot.innerHTML = html;
 }
 
@@ -1518,15 +1656,20 @@ function renderSummaryBar() {
 
   bar.innerHTML = totals.map(({ sup, si, total, filled }) => {
     const isCheapest = cheapest && si === cheapest.si && total > 0;
+    const isHidden   = state.hiddenSuppliers[si];
     const pct = total > 0 ? Math.round((total / maxTotal) * 100) : 0;
-    return `<div class="summary-card${isCheapest ? " cheapest" : ""}">
+    return `<div class="summary-card${isCheapest ? " cheapest" : ""}${isHidden ? " minimized" : ""}" onclick="${isHidden ? `toggleSupplier(${si})` : ''}" style="${isHidden ? 'cursor:pointer;opacity:0.55;min-width:80px' : ''}">
       <div class="supplier-name">
         ${escHtml(sup)}
         ${isCheapest ? '<span class="badge-best">Menor</span>' : ""}
+        ${isHidden ? '<span style="font-size:9px;color:var(--text-muted);margin-left:4px">(minimizado)</span>' : ""}
       </div>
-      <div class="total-value">${total > 0 ? fmtCurrency(total) : "—"}</div>
-      <div class="items-filled">${filled} / ${state.items.length} itens cotados</div>
-      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+      ${isHidden
+        ? `<div style="font-size:11px;color:var(--text-muted);margin-top:4px">Toque para expandir</div>`
+        : `<div class="total-value">${total > 0 ? fmtCurrency(total) : "—"}</div>
+           <div class="items-filled">${filled} / ${state.items.length} itens cotados</div>
+           <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>`
+      }
     </div>`;
   }).join("");
 }
@@ -1550,6 +1693,64 @@ window.updateSupplierName = function(si, val) {
   state.suppliers[si] = val || `Fornecedor ${si+1}`;
   renderSummaryBar();
   scheduleSave();
+};
+
+// ============================================================
+//  SUPPLIER ADD / REMOVE / TOGGLE
+// ============================================================
+window.toggleSupplier = function(si) {
+  state.hiddenSuppliers[si] = !state.hiddenSuppliers[si];
+  renderColHeaders();
+  renderTableBody();
+  renderTotals();
+  renderSummaryBar();
+  scheduleSave();
+};
+
+window.addSupplier = function() {
+  const letters = 'ABCDEFGHIJKLMNOP';
+  const idx = state.suppliers.length;
+  state.suppliers.push(`Fornecedor ${letters[idx] || idx + 1}`);
+  renderAll();
+  scheduleSave();
+  toast(`✅ Fornecedor ${idx + 1} adicionado!`, 'success');
+};
+
+window.removeSupplier = function(si) {
+  if (state.suppliers.length <= 1) {
+    toast('⚠️ Deve haver ao menos 1 fornecedor', 'error');
+    return;
+  }
+  const name = state.suppliers[si];
+  if (!confirm(`Remover "${name}" e todos os preços cadastrados para ele?`)) return;
+
+  // Remove supplier
+  state.suppliers.splice(si, 1);
+
+  // Re-index prices (shift keys for suppliers > si down by 1)
+  const newPrices = {};
+  Object.entries(state.prices).forEach(([key, val]) => {
+    const parts  = key.split('-');
+    const supIdx = parseInt(parts[parts.length - 1], 10);
+    const itemId = parts.slice(0, -1).join('-');
+    if (supIdx < si)       newPrices[key] = val;
+    else if (supIdx > si)  newPrices[`${itemId}-${supIdx - 1}`] = val;
+    // supIdx === si: dropped
+  });
+  state.prices = newPrices;
+
+  // Re-index hiddenSuppliers
+  const newHidden = {};
+  Object.entries(state.hiddenSuppliers).forEach(([k, v]) => {
+    const idx = parseInt(k, 10);
+    if (idx < si)       newHidden[k] = v;
+    else if (idx > si)  newHidden[idx - 1] = v;
+  });
+  state.hiddenSuppliers = newHidden;
+
+  renderAll();
+  scheduleSave();
+  toast(`🗑️ Fornecedor removido`, '');
 };
 
 window.updateItemField = function(id, field, val) {
