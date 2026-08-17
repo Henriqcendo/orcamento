@@ -694,14 +694,14 @@ function renderContent(a) {
     const isHidden   = hiddenCats.has(cat);
 
     html += `<div class="cat-section">
-      <div class="cat-label ${catCls}" style="display:flex;align-items:center">
+      <div class="cat-label ${catCls}" style="display:flex;align-items:center;gap:8px">
+        <button class="eye-btn${isHidden ? ' hidden-cat' : ''}" style="margin-left:0" onclick="toggleCatVisibility('${escHtml(cat).replace(/'/g,'\\&apos;')}')" title="${isHidden ? 'Incluir categoria' : 'Desconsiderar categoria'}">
+          ${isHidden ? '🙈' : '👁️'}
+        </button>
         <span>${meta.emoji} ${escHtml(cat)}</span>
         <span style="margin-left:auto;font-weight:400;opacity:${isHidden ? .4 : .8}">
           ${isHidden ? '<s>' : ''}${fmtCurrency(catRowTotal)}${isHidden ? '</s>' : ''}
         </span>
-        <button class="eye-btn${isHidden ? ' hidden-cat' : ''}" onclick="toggleCatVisibility('${escHtml(cat).replace(/'/g,'\\&apos;')}')" title="${isHidden ? 'Mostrar' : 'Ocultar'} categoria">
-          ${isHidden ? '🙈' : '👁️'}
-        </button>
       </div>
       <div class="cat-items-body${isHidden ? ' hidden' : ''}" id="cat-items-${catKey}">`;
 

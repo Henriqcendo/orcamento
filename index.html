@@ -1599,17 +1599,19 @@ function renderTableBody() {
     html += `<tr class="cat-header cat-${catIdx}${isHidden ? ' cat-ignored' : ''}" data-cat="${escHtml(cat)}">
       <td colspan="${totalColCount()}">
         <div class="cat-header-content">
-          <span class="cat-header-title" onclick="toggleCat('${escHtml(cat)}')" title="Clique no nome para recolher/expandir visualmente (mantém no total)">
-            <span style="font-size:10px">${isCollapsed ? "▶" : "▼"}</span>
-            <span>${meta.emoji} ${cat}</span>
-            <span class="cat-count">(${items.length} itens)</span>
-            ${isHidden ? '<span class="cat-ignored-badge">🚫 Desconsiderado do total</span>' : ''}
-          </span>
-          <button class="eye-btn${isHidden ? ' hidden-cat' : ''}"
-                  onclick="event.stopPropagation(); toggleCatEye('${escHtml(cat)}')"
-                  title="${isHidden ? 'Incluir categoria no total geral' : 'Desconsiderar categoria do total geral e encolher'}">
-            ${isHidden ? '🙈' : '👁️'}
-          </button>
+          <div style="display:inline-flex;align-items:center;gap:8px">
+            <button class="eye-btn${isHidden ? ' hidden-cat' : ''}"
+                    onclick="event.stopPropagation(); toggleCatEye('${escHtml(cat)}')"
+                    title="${isHidden ? 'Incluir categoria no total geral' : 'Desconsiderar categoria do total geral e encolher'}">
+              ${isHidden ? '🙈' : '👁️'}
+            </button>
+            <span class="cat-header-title" onclick="toggleCat('${escHtml(cat)}')" title="Clique no nome para recolher/expandir visualmente (mantém no total)">
+              <span style="font-size:10px">${isCollapsed ? "▶" : "▼"}</span>
+              <span>${meta.emoji} ${cat}</span>
+              <span class="cat-count">(${items.length} itens)</span>
+              ${isHidden ? '<span class="cat-ignored-badge">🚫 Desconsiderado do total</span>' : ''}
+            </span>
+          </div>
         </div>
       </td>
     </tr>`;
