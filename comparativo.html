@@ -103,17 +103,25 @@
     /* ── CONTENT ── */
     .content { padding:16px 20px 100px; max-width:980px; margin:0 auto; }
 
-    /* ── GLOBAL COMPARISON CARD ── */
+    /* ── GLOBAL CARD ── */
     .global-card {
       background:var(--surface); border:1px solid var(--border);
-      border-radius:var(--radius); padding:18px 20px; margin-bottom:20px;
+      border-radius:var(--radius); margin-bottom:20px; overflow:hidden;
     }
+    .gc-header {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:14px 20px; cursor:pointer; user-select:none;
+      -webkit-tap-highlight-color:transparent;
+    }
+    .gc-header:hover { background:rgba(255,255,255,.02); }
     .gc-title {
       font-size:13px; font-weight:700; color:var(--muted);
-      text-transform:uppercase; letter-spacing:.7px; margin-bottom:14px;
+      text-transform:uppercase; letter-spacing:.7px;
       display:flex; align-items:center; gap:8px;
     }
-    .gc-title::after { content:''; flex:1; height:1px; background:var(--border); }
+    .gc-summary { font-size:12px; color:var(--muted); margin-top:2px; }
+    .gc-body { display:none; padding:0 20px 18px; }
+    .gc-body.open { display:block; }
 
     /* Global totals grid */
     .sup-compare-grid {
@@ -256,16 +264,32 @@
     /* ── CATEGORY SUBTOTAL ── */
     .cat-subtotal {
       background:var(--surface2); border:1px solid var(--border);
-      border-top:2px solid var(--border); padding:10px 14px;
+      border-top:2px solid var(--border);
     }
+    .cat-sub-header {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:8px 14px; cursor:pointer; user-select:none;
+      -webkit-tap-highlight-color:transparent;
+    }
+    .cat-sub-header:hover { background:rgba(255,255,255,.02); }
     .cat-sub-title {
       font-size:10px; font-weight:700; color:var(--muted);
-      text-transform:uppercase; letter-spacing:.5px; margin-bottom:8px;
+      text-transform:uppercase; letter-spacing:.5px;
+      display:flex; align-items:center; gap:6px;
     }
+    .cat-sub-body { display:none; padding:10px 14px 12px; }
+    .cat-sub-body.open { display:block; }
     .cat-sub-grid {
       display:grid; gap:6px;
       grid-template-columns:repeat(auto-fill, minmax(120px,1fr));
     }
+    .toggle-icon {
+      font-size:10px; color:var(--muted); transition:transform .2s;
+      width:20px; height:20px; display:flex; align-items:center; justify-content:center;
+      background:var(--surface); border:1px solid var(--border); border-radius:4px;
+      flex-shrink:0;
+    }
+    .toggle-icon.open { color:var(--accent); border-color:var(--accent); }
     .cat-sub-cell {
       background:var(--surface); border:1px solid var(--border);
       border-radius:var(--radius-sm); padding:7px 10px; text-align:center;
@@ -541,7 +565,6 @@ function renderContent(a) {
     return;
   }
 
-  // ── 1. GLOBAL COMPARISON CARD ──────────────────────
   const maxFull   = Math.max(...supFullTotals.filter(t=>t>0), 1);
   const cheapFull = supFullTotals[cheapestFullIdx] || 0;
 
@@ -570,25 +593,37 @@ function renderContent(a) {
   const bestSingle = supFullTotals[cheapestFullIdx] || 0;
   const savingMixed = bestSingle - mixedTotal;
   const savingPct   = bestSingle > 0 ? (savingMixed/bestSingle*100).toFixed(1) : 0;
+  const cheapSupName = state.suppliers[cheapestFullIdx] || '—';
+  const globalSummary = cheapFull > 0 ? `Menor: <strong style="color:var(--green)">${escHtml(cheapSupName)} ${fmtCurrency(cheapFull)}</strong>` : 'Preencha preços';
 
   let html = `
   <div class="global-card">
-    <div class="gc-title">📊 Comparativo Global — Todas as lojas</div>
-    <div class="sup-compare-grid">${supCards}</div>
-    ${mixedTotal > 0 ? `
-    <div class="mixed-row">
-      <div class="mixed-row-left">
-        <div class="mixed-row-title">🎯 Compra mista ideal (item mais barato de cada loja)</div>
-        <div class="mixed-row-sub">
-          Comprando cada item na loja mais barata você economiza
-          ${savingMixed > 0 ? `<strong style="color:var(--green)">${fmtCurrency(savingMixed)} (${savingPct}%)</strong> em relação à loja mais barata sozinha` : 'o mesmo que a loja mais barata'}
+    <div class="gc-header" onclick="toggleGlobal()">
+      <div>
+        <div class="gc-title">📊 Comparativo Global — Todas as lojas</div>
+        <div class="gc-summary">${globalSummary}</div>
+      </div>
+      <div class="toggle-icon" id="global-toggle-icon">▶</div>
+    </div>
+    <div class="gc-body" id="global-body">
+      <div class="sup-compare-grid" style="margin-bottom:12px">${supCards}</div>
+      ${mixedTotal > 0 ? `
+      <div class="mixed-row">
+        <div class="mixed-row-left">
+          <div class="mixed-row-title">🎯 Compra mista ideal (item mais barato de cada loja)</div>
+          <div class="mixed-row-sub">
+            Comprando cada item na loja mais barata você economiza
+            ${savingMixed > 0
+              ? `<strong style="color:var(--green)">${fmtCurrency(savingMixed)} (${savingPct}%)</strong> em relação à loja mais barata sozinha`
+              : 'o mesmo que a loja mais barata'}
+          </div>
         </div>
-      </div>
-      <div class="mixed-row-right">
-        <div class="mixed-total">${fmtCurrency(mixedTotal)}</div>
-        <div class="mixed-saving">mínimo possível</div>
-      </div>
-    </div>` : ''}
+        <div class="mixed-row-right">
+          <div class="mixed-total">${fmtCurrency(mixedTotal)}</div>
+          <div class="mixed-saving">mínimo possível</div>
+        </div>
+      </div>` : ''}
+    </div>
   </div>`;
 
   // ── 2. STORE HEADER ────────────────────────────────
@@ -707,9 +742,15 @@ function renderContent(a) {
         </div>`;
       }).join('');
 
+      const catKey = cat.replace(/[^a-z0-9]/gi,'_');
       html += `<div class="cat-subtotal">
-        <div class="cat-sub-title">📊 Subtotal por loja — ${escHtml(cat)}</div>
-        <div class="cat-sub-grid">${subCells}</div>
+        <div class="cat-sub-header" onclick="toggleCatSub('${catKey}')">
+          <div class="cat-sub-title">📊 Subtotal por loja — ${escHtml(cat)}</div>
+          <div class="toggle-icon" id="cat-toggle-${catKey}">▶</div>
+        </div>
+        <div class="cat-sub-body" id="cat-sub-${catKey}">
+          <div class="cat-sub-grid">${subCells}</div>
+        </div>
       </div>`;
     }
 
@@ -744,6 +785,22 @@ function updatePrintHeader(sup, count, total) {
   document.getElementById('print-meta').textContent =
     `${count} itens · Total: ${fmtCurrency(total)} · Impresso em ${new Date().toLocaleDateString('pt-BR')}`;
 }
+
+window.toggleGlobal = function() {
+  const body = document.getElementById('global-body');
+  const icon = document.getElementById('global-toggle-icon');
+  if (!body) return;
+  const open = body.classList.toggle('open');
+  if (icon) { icon.classList.toggle('open', open); icon.textContent = open ? '▼' : '▶'; }
+};
+
+window.toggleCatSub = function(catKey) {
+  const body = document.getElementById(`cat-sub-${catKey}`);
+  const icon = document.getElementById(`cat-toggle-${catKey}`);
+  if (!body) return;
+  const open = body.classList.toggle('open');
+  if (icon) { icon.classList.toggle('open', open); icon.textContent = open ? '▼' : '▶'; }
+};
 
 window.setActiveSupplier = function(si) {
   activeSupplierIdx = si;
