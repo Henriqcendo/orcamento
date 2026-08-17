@@ -329,7 +329,7 @@
 
     /* Category header rows */
     .cat-header td {
-      padding: 10px 16px;
+      padding: 8px 16px;
       font-size: 11px;
       font-weight: 700;
       text-transform: uppercase;
@@ -337,6 +337,56 @@
       border-top: 2px solid;
       position: sticky;
       top: 0;
+    }
+
+    .cat-header-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+    }
+
+    .cat-header-title {
+      cursor: pointer;
+      user-select: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .cat-count {
+      font-weight: 400;
+      opacity: 0.7;
+      margin-left: 4px;
+      text-transform: none;
+      letter-spacing: normal;
+    }
+
+    .eye-btn {
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 5px;
+      color: inherit;
+      font-size: 13px;
+      width: 26px;
+      height: 26px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: all 0.15s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .eye-btn:hover {
+      background: rgba(255, 255, 255, 0.25);
+      transform: scale(1.05);
+    }
+
+    .eye-btn.hidden-cat {
+      opacity: 0.6;
+      border-color: rgba(255, 255, 255, 0.1);
     }
 
     /* Individual category header colors */
@@ -818,7 +868,7 @@
       .header-actions, .toolbar, .summary-bar,
       .btn-row-delete, .td-actions, .setup-banner,
       #toast-container, #add-item-modal,
-      .print-menu-wrap { display: none !important; }
+      .print-menu-wrap, .eye-btn { display: none !important; }
 
       /* Show print header */
       .print-header { display: block !important; }
@@ -1527,10 +1577,17 @@ function renderTableBody() {
     // Category header row
     html += `<tr class="cat-header cat-${catIdx}" data-cat="${escHtml(cat)}">
       <td colspan="${totalColCount()}">
-        <span style="cursor:pointer; user-select:none" onclick="toggleCat('${escHtml(cat)}')">
-          ${isCollapsed ? "▶" : "▼"} ${meta.emoji} ${cat}
-          <span style="font-weight:400; opacity:0.7">(${items.length} itens)</span>
-        </span>
+        <div class="cat-header-content">
+          <span class="cat-header-title" onclick="toggleCat('${escHtml(cat)}')">
+            ${isCollapsed ? "▶" : "▼"} ${meta.emoji} ${cat}
+            <span class="cat-count">(${items.length} itens)</span>
+          </span>
+          <button class="eye-btn${isCollapsed ? ' hidden-cat' : ''}"
+                  onclick="event.stopPropagation(); toggleCat('${escHtml(cat)}')"
+                  title="${isCollapsed ? 'Mostrar categoria' : 'Ocultar categoria'}">
+            ${isCollapsed ? '🙈' : '👁️'}
+          </button>
+        </div>
       </td>
     </tr>`;
 
@@ -1841,7 +1898,7 @@ window.toggleCat = function(cat) {
   renderTableBody();
 };
 
-window.expandAll  = function() { Object.keys(state.collapsed).forEach(k => state.collapsed[k] = false); renderTableBody(); };
+window.expandAll  = function() { [...new Set(state.items.map(i => i.cat))].forEach(c => state.collapsed[c] = false); renderTableBody(); };
 window.collapseAll = function() { [...new Set(state.items.map(i => i.cat))].forEach(c => state.collapsed[c] = true); renderTableBody(); };
 
 // ============================================================
