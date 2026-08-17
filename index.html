@@ -1048,6 +1048,48 @@
     .sup-ctrl-del { }
     .sup-ctrl-del:hover { color: var(--red) !important; border-color: rgba(248,81,73,0.4) !important; }
 
+    .sup-move-btn {
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+    .sup-move-btn:hover:not(:disabled) {
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    /* Organize Suppliers Modal */
+    .organize-sup-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      gap: 10px;
+    }
+    .organize-sup-rank {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      background: rgba(88,166,255,0.12);
+      border: 1px solid rgba(88,166,255,0.25);
+      border-radius: 4px;
+      padding: 2px 7px;
+      min-width: 28px;
+      text-align: center;
+    }
+    .organize-sup-name {
+      font-size: 13px;
+      font-weight: 600;
+      flex: 1;
+      color: var(--text);
+    }
+    .organize-sup-actions {
+      display: flex;
+      gap: 6px;
+    }
+
     .sup-ctrl-add {
       width: 28px; height: 28px;
       background: rgba(63,185,80,0.12);
@@ -1210,6 +1252,9 @@
   <button class="btn btn-ghost" onclick="addSupplier()">
     🏪 <span>+ Fornecedor</span>
   </button>
+  <button class="btn btn-ghost" onclick="openOrganizeSuppliersModal()" title="Reorganizar ordem das lojas">
+    ↕️ <span>Organizar Lojas</span>
+  </button>
   <div class="toolbar-sep"></div>
   <button class="btn btn-ghost" onclick="expandAll()">📂 <span>Expandir</span></button>
   <button class="btn btn-ghost" onclick="collapseAll()">📁 <span>Recolher</span></button>
@@ -1269,6 +1314,24 @@
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeAddItemModal()">Cancelar</button>
       <button class="btn btn-success" onclick="addItem()">✅ Adicionar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     ORGANIZE SUPPLIERS MODAL
+============================================================ -->
+<div class="modal-overlay" id="organize-suppliers-modal">
+  <div class="modal-panel" style="max-width:440px">
+    <div class="modal-title">↕️ Organizar Ordem das Lojas</div>
+    <p style="font-size:12px;color:var(--text-muted);margin-bottom:14px">
+      Mova as lojas para cima ou para baixo para definir quais aparecem primeiro na tabela de cotação.
+    </p>
+    <div id="organize-suppliers-list" style="display:flex;flex-direction:column;gap:8px;max-height:360px;overflow-y:auto;padding-right:4px">
+      <!-- Populated by JS -->
+    </div>
+    <div class="modal-actions" style="margin-top:16px">
+      <button class="btn btn-primary" style="width:100%" onclick="closeOrganizeSuppliersModal()">Concluir</button>
     </div>
   </div>
 </div>
@@ -1552,15 +1615,17 @@ function renderColHeaders() {
         <span class="collapsed-sup-expand">▶</span>
       </th>`;
     } else {
-      // Expanded: 2-column group with controls
+      // Expanded: 2-column group with reorder + edit + minimize + delete controls
       html += `
       <th colspan="2" class="price-col supplier-group">
-        <div style="display:flex;align-items:center;gap:5px;justify-content:center">
+        <div style="display:flex;align-items:center;gap:4px;justify-content:center">
+          <button class="sup-ctrl-btn sup-move-btn" onclick="moveSupplier(${si}, -1)" ${si === 0 ? 'disabled style="opacity:0.25;cursor:not-allowed"' : ''} title="Mover para esquerda (aparecer antes)">◀</button>
           <input class="supplier-name-input" id="sup-name-${si}"
                  value="${escHtml(sup)}"
                  onchange="updateSupplierName(${si}, this.value)"
                  placeholder="Fornecedor ${si+1}"
-                 style="flex:1;min-width:80px" />
+                 style="flex:1;min-width:70px" />
+          <button class="sup-ctrl-btn sup-move-btn" onclick="moveSupplier(${si}, 1)" ${si === state.suppliers.length - 1 ? 'disabled style="opacity:0.25;cursor:not-allowed"' : ''} title="Mover para direita (aparecer depois)">▶</button>
           <button class="sup-ctrl-btn" onclick="toggleSupplier(${si})" title="Minimizar fornecedor">−</button>
           ${state.suppliers.length > 1
             ? `<button class="sup-ctrl-btn sup-ctrl-del" onclick="removeSupplier(${si})" title="Remover fornecedor">✕</button>`
@@ -1811,6 +1876,77 @@ window.updateSupplierName = function(si, val) {
 // ============================================================
 //  SUPPLIER ADD / REMOVE / TOGGLE
 // ============================================================
+// ============================================================
+//  SUPPLIER REORDER & MANAGEMENT
+// ============================================================
+window.reorderSuppliers = function(newOrder) {
+  const newSuppliers = newOrder.map(oldIdx => state.suppliers[oldIdx]);
+  const newHidden = {};
+  newOrder.forEach((oldIdx, newIdx) => {
+    if (state.hiddenSuppliers[oldIdx]) newHidden[newIdx] = true;
+  });
+
+  const newPrices = {};
+  state.items.forEach(item => {
+    newOrder.forEach((oldIdx, newIdx) => {
+      const oldKey = `${item.id}-${oldIdx}`;
+      const newKey = `${item.id}-${newIdx}`;
+      if (state.prices[oldKey] !== undefined) {
+        newPrices[newKey] = state.prices[oldKey];
+      }
+    });
+  });
+
+  state.suppliers = newSuppliers;
+  state.hiddenSuppliers = newHidden;
+  state.prices = newPrices;
+
+  renderAll();
+  scheduleSave();
+};
+
+window.moveSupplier = function(si, direction) {
+  const targetIdx = si + direction;
+  if (targetIdx < 0 || targetIdx >= state.suppliers.length) return;
+
+  const order = state.suppliers.map((_, i) => i);
+  const temp = order[si];
+  order[si] = order[targetIdx];
+  order[targetIdx] = temp;
+
+  window.reorderSuppliers(order);
+  toast(`↔️ "${state.suppliers[targetIdx]}" movido para a ${targetIdx + 1}ª posição!`, 'success');
+};
+
+window.openOrganizeSuppliersModal = function() {
+  document.getElementById("organize-suppliers-modal").classList.add("open");
+  renderOrganizeList();
+};
+
+window.closeOrganizeSuppliersModal = function() {
+  document.getElementById("organize-suppliers-modal").classList.remove("open");
+};
+
+function renderOrganizeList() {
+  const container = document.getElementById("organize-suppliers-list");
+  if (!container) return;
+
+  container.innerHTML = state.suppliers.map((sup, si) => {
+    const isFirst = si === 0;
+    const isLast  = si === state.suppliers.length - 1;
+    const isHidden = state.hiddenSuppliers[si];
+    return `
+    <div class="organize-sup-item">
+      <span class="organize-sup-rank">${si + 1}º</span>
+      <span class="organize-sup-name">${escHtml(sup)} ${isHidden ? '<span style="font-size:10px;color:var(--text-muted)">(minimizado)</span>' : ''}</span>
+      <div class="organize-sup-actions">
+        <button class="btn btn-ghost" style="padding:4px 8px;font-size:11px" onclick="moveSupplier(${si}, -1); renderOrganizeList();" ${isFirst ? 'disabled style="opacity:0.3;cursor:not-allowed"' : ''} title="Mover para cima (aparecer primeiro)">⬆️ Subir</button>
+        <button class="btn btn-ghost" style="padding:4px 8px;font-size:11px" onclick="moveSupplier(${si}, 1); renderOrganizeList();" ${isLast ? 'disabled style="opacity:0.3;cursor:not-allowed"' : ''} title="Mover para baixo">⬇️ Descer</button>
+      </div>
+    </div>`;
+  }).join("");
+}
+
 window.toggleSupplier = function(si) {
   state.hiddenSuppliers[si] = !state.hiddenSuppliers[si];
   renderColHeaders();
@@ -2148,6 +2284,10 @@ function escHtml(str) {
 // ============================================================
 document.getElementById("add-item-modal").addEventListener("click", function(e) {
   if (e.target === this) closeAddItemModal();
+});
+
+document.getElementById("organize-suppliers-modal").addEventListener("click", function(e) {
+  if (e.target === this) closeOrganizeSuppliersModal();
 });
 
 // ============================================================
