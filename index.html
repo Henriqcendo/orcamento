@@ -142,6 +142,13 @@
     .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(88,166,255,0.3); }
     .btn-primary:active { transform: translateY(0); }
 
+    .btn-compare {
+      background: linear-gradient(135deg, var(--green), #2ea043);
+      color: #fff;
+    }
+    .btn-compare:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(63,185,80,0.35); }
+    .btn-compare:active { transform: translateY(0); }
+
     .btn-ghost {
       background: var(--surface2);
       color: var(--text);
@@ -1141,6 +1148,8 @@
   <button class="btn btn-ghost" onclick="collapseAll()">📁 <span>Recolher</span></button>
   <div class="toolbar-sep"></div>
   <button class="btn btn-ghost" onclick="exportCSV()">📊 <span>Exportar CSV</span></button>
+  <div class="toolbar-sep"></div>
+  <button class="btn btn-compare" onclick="goToComparativo()">🛍️ <span>Lista de Compras</span></button>
 </div>
 
 <!-- ============================================================
@@ -1993,6 +2002,16 @@ window.printBlank = function() {
 
 // Legacy fallback
 window.printPage = window.printFilled;
+
+// ============================================================
+//  NAVIGATE TO COMPARATIVO
+// ============================================================
+window.goToComparativo = function() {
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get('id');
+  const dest = id ? `comparativo.html?id=${id}` : 'comparativo.html';
+  window.location.href = dest;
+};
 
 // ============================================================
 //  ESCAPE HTML

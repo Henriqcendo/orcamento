@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Lista de Compras — Comparativo</title>
+  <meta name="description" content="Lista de compras por fornecedor com menor preço por item." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0d1117;
+      --surface:   #161b22;
+      --surface2:  #1e2530;
+      --border:    #30363d;
+      --text:      #e6edf3;
+      --muted:     #8b949e;
+      --accent:    #58a6ff;
+      --green:     #3fb950;
+      --green-dim: #0e2d17;
+      --red:       #f85149;
+      --orange:    #e3b341;
+      --purple:    #bc8cff;
+      --radius:    12px;
+      --radius-sm: 8px;
+      --font:      'Inter', system-ui, sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    /* ── HEADER ─────────────────────────────────── */
+    header {
+      background: linear-gradient(135deg,#0d1117,#161b22,#1a2236);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 20px;
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    }
+
+    .header-left { display: flex; align-items: center; gap: 10px; }
+
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--surface2); border: 1px solid var(--border);
+      color: var(--muted); border-radius: var(--radius-sm);
+      padding: 7px 12px; font-family: var(--font); font-size: 12px;
+      font-weight: 600; cursor: pointer; text-decoration: none;
+      transition: all .2s;
+    }
+    .back-btn:hover { color: var(--text); background: var(--border); }
+
+    .header-title { font-size: 16px; font-weight: 800; }
+    .header-sub   { font-size: 11px; color: var(--muted); }
+
+    .sync-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 11px; color: var(--muted); padding: 4px 8px;
+      background: var(--surface2); border-radius: 20px; border: 1px solid var(--border);
+    }
+    .sync-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); transition: background .3s; }
+    .sync-dot.synced  { background: var(--green); }
+    .sync-dot.syncing { background: var(--orange); animation: pulse 1s infinite; }
+    .sync-dot.error   { background: var(--red); }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+    /* ── STORE TABS ──────────────────────────────── */
+    .stores-scroll {
+      display: flex; gap: 10px; padding: 14px 20px; overflow-x: auto;
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      scrollbar-width: none;
+    }
+    .stores-scroll::-webkit-scrollbar { display: none; }
+
+    .store-tab {
+      flex-shrink: 0; border-radius: var(--radius-sm);
+      padding: 10px 14px; cursor: pointer; border: 1px solid var(--border);
+      background: var(--surface2); transition: all .2s; text-align: left;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .store-tab:hover { border-color: var(--accent); }
+    .store-tab.active {
+      border-color: var(--green); background: var(--green-dim);
+    }
+    .store-tab .st-name {
+      font-size: 13px; font-weight: 700; color: var(--text);
+      display: flex; align-items: center; gap: 5px;
+    }
+    .store-tab.active .st-name { color: var(--green); }
+    .store-tab .st-items { font-size: 10px; color: var(--muted); margin-top: 2px; }
+    .store-tab .st-total { font-size: 14px; font-weight: 800; margin-top: 4px; }
+    .store-tab.active .st-total { color: var(--green); }
+    .badge-best {
+      background: var(--green); color: #000; font-size: 9px;
+      padding: 1px 5px; border-radius: 10px; font-weight: 700;
+    }
+
+    /* ── TOOLBAR ─────────────────────────────────── */
+    .toolbar {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 20px; border-bottom: 1px solid var(--border);
+      background: var(--bg); overflow-x: auto; scrollbar-width: none;
+    }
+    .toolbar::-webkit-scrollbar { display: none; }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 14px; border-radius: var(--radius-sm);
+      font-family: var(--font); font-size: 13px; font-weight: 600;
+      cursor: pointer; border: none; transition: all .2s;
+      white-space: nowrap; -webkit-tap-highlight-color: transparent;
+    }
+    .btn-ghost { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+    .btn-ghost:hover { background: var(--border); }
+    .btn-print { background: linear-gradient(135deg,var(--accent),#4a9eff); color: #fff; }
+    .btn-print:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(88,166,255,.3); }
+    @media(max-width:480px) { .btn span { display: none; } .btn { padding: 8px; } }
+
+    /* ── CONTENT ─────────────────────────────────── */
+    .content { padding: 16px 20px 100px; max-width: 900px; margin: 0 auto; }
+
+    /* Store header card */
+    .store-header-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 16px 20px;
+      margin-bottom: 16px; display: flex; align-items: center;
+      justify-content: space-between; gap: 12px; flex-wrap: wrap;
+    }
+    .shc-title { font-size: 18px; font-weight: 800; }
+    .shc-meta  { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .shc-total { text-align: right; }
+    .shc-total-val { font-size: 22px; font-weight: 800; color: var(--green); }
+    .shc-total-lbl { font-size: 11px; color: var(--muted); }
+
+    /* Category section */
+    .cat-section { margin-bottom: 20px; }
+    .cat-label {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .8px; padding: 7px 12px; border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+      margin-bottom: 2px; display: flex; align-items: center; gap: 6px;
+    }
+    .cat-1 { background: #1e3a5f; color: #58a6ff; }
+    .cat-2 { background: #2d1e5f; color: #bc8cff; }
+    .cat-3 { background: #1e4a2d; color: #3fb950; }
+    .cat-4 { background: #4a2d1e; color: #e3b341; }
+    .cat-5 { background: #4a1e2d; color: #f778a1; }
+    .cat-6 { background: #1e424a; color: #39d353; }
+    .cat-7 { background: #2d2d1e; color: #e3b341; }
+
+    /* Item card */
+    .item-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-left: 3px solid var(--green);
+      border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+      margin-bottom: 2px; overflow: hidden;
+      transition: border-color .2s;
+    }
+    .item-card:last-child { border-radius: 0 0 var(--radius-sm) var(--radius-sm); margin-bottom: 0; }
+    .item-card:first-of-type { border-radius: var(--radius-sm); }
+
+    .item-main {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 14px; cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .item-main:hover { background: rgba(255,255,255,.02); }
+
+    .item-info { flex: 1; min-width: 0; }
+    .item-name { font-size: 14px; font-weight: 700; color: var(--text); }
+    .item-desc { font-size: 11px; color: var(--muted); margin-top: 2px;
+                 white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .item-qty-unit {
+      display: flex; align-items: center; gap: 4px;
+      font-size: 12px; color: var(--muted); flex-shrink: 0;
+    }
+    .qty-badge {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 6px; padding: 2px 8px; font-weight: 700;
+      font-size: 13px; color: var(--text);
+    }
+
+    .item-price-block { text-align: right; flex-shrink: 0; min-width: 90px; }
+    .unit-price { font-size: 11px; color: var(--muted); }
+    .line-total  { font-size: 16px; font-weight: 800; color: var(--green); }
+
+    .expand-btn {
+      width: 28px; height: 28px; flex-shrink: 0;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 6px; display: flex; align-items: center; justify-content: center;
+      font-size: 12px; color: var(--muted); cursor: pointer; transition: all .15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .expand-btn.open { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+
+    /* Comparison panel */
+    .compare-panel {
+      display: none; border-top: 1px solid var(--border);
+      background: var(--surface2); padding: 12px 14px;
+    }
+    .compare-panel.open { display: block; }
+
+    .compare-title {
+      font-size: 10px; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px;
+    }
+
+    .compare-grid {
+      display: grid; gap: 6px;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    }
+
+    .compare-store {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 8px 10px;
+      text-align: center; transition: all .15s;
+    }
+    .compare-store.is-best {
+      border-color: var(--green); background: var(--green-dim);
+    }
+    .compare-store.is-active-view {
+      border-color: var(--accent); background: rgba(88,166,255,.08);
+    }
+    .cs-name  { font-size: 10px; color: var(--muted); font-weight: 600; margin-bottom: 4px; }
+    .cs-price { font-size: 14px; font-weight: 800; }
+    .compare-store.is-best .cs-price { color: var(--green); }
+    .compare-store.is-active-view .cs-price { color: var(--accent); }
+    .cs-diff  { font-size: 10px; color: var(--muted); margin-top: 2px; }
+    .cs-diff.more-expensive { color: var(--red); }
+    .cs-diff.no-price       { color: var(--border); font-style: italic; }
+    .cs-total { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+    /* ── EMPTY STATE ─────────────────────────────── */
+    .empty-state {
+      text-align: center; padding: 48px 20px; color: var(--muted);
+    }
+    .empty-state .es-icon { font-size: 40px; margin-bottom: 12px; }
+    .empty-state h3 { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+    .empty-state p  { font-size: 13px; }
+
+    /* ── LOADING ─────────────────────────────────── */
+    .loading {
+      text-align: center; padding: 60px 20px; color: var(--muted);
+    }
+    .loading .spinner {
+      width: 32px; height: 32px; border: 3px solid var(--border);
+      border-top-color: var(--accent); border-radius: 50%;
+      animation: spin .8s linear infinite; margin: 0 auto 14px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── TOAST ───────────────────────────────────── */
+    #toast-container {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      z-index: 300; display: flex; flex-direction: column; gap: 8px;
+      pointer-events: none; width: 90%; max-width: 340px;
+    }
+    .toast {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 10px 14px; font-size: 13px;
+      font-weight: 500; display: flex; align-items: center; gap: 8px;
+      animation: toastIn .25s ease, toastOut .25s ease 2.5s forwards;
+      box-shadow: 0 4px 20px rgba(0,0,0,.4);
+    }
+    @keyframes toastIn  { from { opacity:0; transform: translateY(20px); } }
+    @keyframes toastOut { to   { opacity:0; transform: translateY(20px); } }
+
+    /* ── PRINT ───────────────────────────────────── */
+    .print-header { display: none; }
+
+    @media print {
+      header, .stores-scroll, .toolbar, .expand-btn,
+      .compare-panel, #toast-container { display: none !important; }
+      .print-header { display: block !important; padding-bottom: 10px; border-bottom: 2px solid #000; margin-bottom: 12px; }
+      .print-header h2 { font-size: 16px; font-weight: 800; color: #000; }
+      .print-header p  { font-size: 11px; color: #555; }
+      body { background: #fff !important; color: #000 !important; font-size: 11px; }
+      .content { padding: 0 !important; max-width: 100% !important; }
+      .store-header-card { background: #f5f5f5 !important; border: 1px solid #ccc !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+      .shc-title { color: #000 !important; }
+      .shc-total-val { color: #1a6b2e !important; }
+      .item-card { border: 1px solid #ddd !important; background: #fff !important; break-inside: avoid; }
+      .item-name  { color: #000 !important; }
+      .line-total { color: #1a6b2e !important; }
+      .cat-label  { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+      .cat-section { break-inside: avoid; }
+      @page { margin: 12mm 10mm; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- PRINT HEADER -->
+<div class="print-header" id="print-header">
+  <h2>🏗️ Lista de Compras — <span id="print-store-name"></span></h2>
+  <p id="print-meta"></p>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="header-left">
+    <a class="back-btn" id="back-link" href="index.html">← <span>Orçamento</span></a>
+    <div>
+      <div class="header-title">🛒 Lista de Compras</div>
+      <div class="header-sub">Itens mais baratos por fornecedor</div>
+    </div>
+  </div>
+  <div class="sync-badge">
+    <div class="sync-dot" id="sync-dot"></div>
+    <span id="sync-label">Carregando…</span>
+  </div>
+</header>
+
+<!-- STORE TABS -->
+<div class="stores-scroll" id="stores-scroll">
+  <div class="loading"><div class="spinner"></div></div>
+</div>
+
+<!-- TOOLBAR -->
+<div class="toolbar">
+  <button class="btn btn-ghost" onclick="expandAllCompare()">👁️ <span>Ver todos comparativos</span></button>
+  <button class="btn btn-ghost" onclick="collapseAllCompare()">🙈 <span>Recolher comparativos</span></button>
+  <button class="btn btn-print" onclick="printList()">🖨️ <span>Imprimir lista</span></button>
+</div>
+
+<!-- CONTENT -->
+<div class="content" id="content">
+  <div class="loading"><div class="spinner"></div><p>Carregando dados…</p></div>
+</div>
+
+<div id="toast-container"></div>
+
+<script type="module">
+// ── FIREBASE CONFIG ──────────────────────────────────────────
+const FIREBASE_CONFIG = {
+  apiKey:            "AIzaSyD6Ia5MRnCdTL0m5Ut1M5L3Ar0Yb3ihiVc",
+  authDomain:        "orcamento-8b904.firebaseapp.com",
+  databaseURL:       "https://orcamento-8b904-default-rtdb.firebaseio.com",
+  projectId:         "orcamento-8b904",
+  storageBucket:     "orcamento-8b904.firebasestorage.app",
+  messagingSenderId: "777526858495",
+  appId:             "1:777526858495:web:1aebe23a77a3f4602672ca",
+  measurementId:     "G-LMHD79YVK8"
+};
+
+// ── STATE ────────────────────────────────────────────────────
+const CATEGORY_META = {
+  "1. Concreto e Formas":    { id: 1, emoji: "🪨" },
+  "2. Ferragens e Aço":      { id: 2, emoji: "🔩" },
+  "3. Alvenaria e Telhado":  { id: 3, emoji: "🧱" },
+  "4. Revestimentos":        { id: 4, emoji: "🪟" },
+  "5. Portas":               { id: 5, emoji: "🚪" },
+  "6. Louças e Instalações": { id: 6, emoji: "🚿" },
+};
+
+let state = { suppliers: [], items: [], prices: {} };
+let activeSupplierIdx = 0;  // which supplier tab is active
+
+// ── INIT ─────────────────────────────────────────────────────
+(async function init() {
+  // Keep ?id= param in back link
+  const params = new URLSearchParams(window.location.search);
+  const orcId  = params.get('id');
+  if (orcId) {
+    document.getElementById('back-link').href = `index.html?id=${orcId}`;
+  }
+
+  try {
+    const { initializeApp }             = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
+    const { getDatabase, ref, get, onValue } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js");
+
+    const app  = initializeApp(FIREBASE_CONFIG);
+    const rtdb = getDatabase(app);
+
+    if (!orcId) {
+      setSyncStatus('error');
+      showError('Nenhum orçamento carregado. Acesse pelo link da página principal.');
+      return;
+    }
+
+    setSyncStatus('syncing');
+    const snap = await get(ref(rtdb, `orcamentos/${orcId}`));
+    if (!snap.exists()) {
+      showError('Orçamento não encontrado. Verifique o link ou crie um novo na página principal.');
+      setSyncStatus('error');
+      return;
+    }
+
+    const data = snap.val();
+    state.suppliers = data.suppliers || ["Fornecedor A","Fornecedor B","Fornecedor C"];
+    state.items     = data.items     || [];
+    state.prices    = data.prices    || {};
+    setSyncStatus('synced');
+
+    // Listen for real-time updates
+    onValue(ref(rtdb, `orcamentos/${orcId}`), snap2 => {
+      if (!snap2.exists()) return;
+      const d = snap2.val();
+      state.suppliers = d.suppliers || state.suppliers;
+      state.items     = d.items     || state.items;
+      state.prices    = d.prices    || state.prices;
+      renderAll();
+    });
+
+    renderAll();
+  } catch(e) {
+    console.error(e);
+    setSyncStatus('error');
+    showError('Erro ao conectar com Firebase: ' + e.message);
+  }
+})();
+
+// ── ANALYSIS ENGINE ───────────────────────────────────────────
+function analyzeData() {
+  // For each item, find cheapest supplier (min non-zero price)
+  const itemBest = {};     // itemId → { si, price }
+  const supGroups = {};    // si → [ {item, price, total} ]
+  const noPrice = [];      // items with no prices at all
+
+  state.suppliers.forEach((_, si) => supGroups[si] = []);
+
+  state.items.forEach(item => {
+    const prices = state.suppliers.map((_, si) => {
+      const p = state.prices[`${item.id}-${si}`];
+      return (p && p > 0) ? p : null;
+    });
+
+    const nonNull = prices.filter(p => p !== null);
+    if (nonNull.length === 0) {
+      noPrice.push(item);
+      return;
+    }
+
+    const minPrice = Math.min(...nonNull);
+    // Find all suppliers tied at min price
+    prices.forEach((p, si) => {
+      if (p === minPrice) {
+        supGroups[si].push({ item, price: p, total: p * (item.qty || 0) });
+      }
+    });
+
+    itemBest[item.id] = { minPrice, prices };
+  });
+
+  // Totals per supplier (only items where this supplier is cheapest)
+  const supTotals = state.suppliers.map((_, si) => {
+    return supGroups[si].reduce((acc, r) => acc + r.total, 0);
+  });
+
+  // Overall cheapest supplier (by total of their best-price items)
+  const validTotals = supTotals.map((t, si) => supGroups[si].length > 0 ? t : null);
+  const minTotal = Math.min(...validTotals.filter(t => t !== null));
+  const cheapestSupIdx = supTotals.indexOf(minTotal);
+
+  return { itemBest, supGroups, supTotals, noPrice, cheapestSupIdx };
+}
+
+// ── RENDER ────────────────────────────────────────────────────
+function renderAll() {
+  const { supGroups, supTotals, cheapestSupIdx } = analyzeData();
+  renderTabs(supGroups, supTotals, cheapestSupIdx);
+  renderContent();
+}
+
+function renderTabs(supGroups, supTotals, cheapestSupIdx) {
+  const bar = document.getElementById('stores-scroll');
+  bar.innerHTML = state.suppliers.map((sup, si) => {
+    const count     = supGroups[si].length;
+    const total     = supTotals[si];
+    const isCheap   = si === cheapestSupIdx && count > 0;
+    const isActive  = si === activeSupplierIdx;
+    return `<div class="store-tab${isActive ? ' active' : ''}" onclick="setActiveSupplier(${si})">
+      <div class="st-name">
+        🏪 ${escHtml(sup)}
+        ${isCheap ? '<span class="badge-best">Menor total</span>' : ''}
+      </div>
+      <div class="st-items">${count} iten${count !== 1 ? 's' : ''} mais barato${count !== 1 ? 's' : ''}</div>
+      <div class="st-total">${total > 0 ? fmtCurrency(total) : '—'}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderContent() {
+  const { supGroups, supTotals, itemBest, noPrice, cheapestSupIdx } = analyzeData();
+  const si      = activeSupplierIdx;
+  const sup     = state.suppliers[si];
+  const items   = supGroups[si];
+  const total   = supTotals[si];
+  const isBest  = si === cheapestSupIdx && items.length > 0;
+  const content = document.getElementById('content');
+
+  if (state.items.length === 0) {
+    content.innerHTML = `<div class="empty-state">
+      <div class="es-icon">📋</div>
+      <h3>Nenhum item cadastrado</h3>
+      <p>Volte ao orçamento e adicione os materiais.</p>
+    </div>`;
+    return;
+  }
+
+  if (items.length === 0) {
+    content.innerHTML = `<div class="empty-state">
+      <div class="es-icon">🤔</div>
+      <h3>Nenhum item mais barato em ${escHtml(sup)}</h3>
+      <p>Preencha os preços desta loja no orçamento principal.</p>
+    </div>`;
+    return;
+  }
+
+  // Group items by category
+  const byCat = {};
+  items.forEach(row => {
+    const cat = row.item.cat || 'Outros';
+    if (!byCat[cat]) byCat[cat] = [];
+    byCat[cat].push(row);
+  });
+
+  const printDate = new Date().toLocaleDateString('pt-BR');
+
+  let html = `
+  <div class="store-header-card">
+    <div>
+      <div class="shc-title">🏪 ${escHtml(sup)}</div>
+      <div class="shc-meta">${items.length} iten${items.length !== 1 ? 's' : ''} com menor preço nesta loja${isBest ? ' · ✅ Fornecedor com menor total geral' : ''}</div>
+    </div>
+    <div class="shc-total">
+      <div class="shc-total-lbl">Total desta lista</div>
+      <div class="shc-total-val">${fmtCurrency(total)}</div>
+    </div>
+  </div>`;
+
+  Object.entries(byCat).forEach(([cat, rows]) => {
+    const meta   = CATEGORY_META[cat] || { id: 7, emoji: '📦' };
+    const catCls = `cat-${meta.id}`;
+    const catTotal = rows.reduce((a, r) => a + r.total, 0);
+
+    html += `<div class="cat-section">
+      <div class="cat-label ${catCls}">${meta.emoji} ${escHtml(cat)} <span style="margin-left:auto;font-weight:400;opacity:.8">${fmtCurrency(catTotal)}</span></div>`;
+
+    rows.forEach(({ item, price, total: lineTotal }, rowIdx) => {
+      const cardId    = `card-${item.id}`;
+      const panelId   = `panel-${item.id}`;
+      const expandId  = `expand-${item.id}`;
+      const bestData  = itemBest[item.id];
+
+      // Build comparison cells for all suppliers
+      const compareCells = state.suppliers.map((supName, sIdx) => {
+        const p      = bestData.prices[sIdx];
+        const isB    = p !== null && p === bestData.minPrice;
+        const isView = sIdx === si;
+
+        let cls = '';
+        if (isB)    cls += ' is-best';
+        if (isView) cls += ' is-active-view';
+
+        let diffHtml = '';
+        if (p === null) {
+          diffHtml = `<div class="cs-diff no-price">sem preço</div>`;
+        } else if (isB) {
+          diffHtml = `<div class="cs-diff" style="color:var(--green)">✅ menor</div>`;
+        } else {
+          const pct = ((p - bestData.minPrice) / bestData.minPrice * 100).toFixed(0);
+          diffHtml = `<div class="cs-diff more-expensive">+${pct}% mais caro</div>`;
+        }
+
+        const lineT = p !== null ? fmtCurrency(p * (item.qty || 0)) : '—';
+
+        return `<div class="compare-store${cls}">
+          <div class="cs-name">${escHtml(supName)}</div>
+          <div class="cs-price">${p !== null ? fmtCurrencyRaw(p) : '—'}</div>
+          ${diffHtml}
+          <div class="cs-total">Total: ${lineT}</div>
+        </div>`;
+      }).join('');
+
+      html += `<div class="item-card" id="${cardId}">
+        <div class="item-main" onclick="toggleCompare('${item.id}')">
+          <div class="item-info">
+            <div class="item-name">${escHtml(item.name)}</div>
+            <div class="item-desc">${escHtml(item.desc)}</div>
+          </div>
+          <div class="item-qty-unit">
+            <div class="qty-badge">${item.qty}</div>
+            <span>${escHtml(item.unit)}</span>
+          </div>
+          <div class="item-price-block">
+            <div class="unit-price">${fmtCurrencyRaw(price)} / ${escHtml(item.unit)}</div>
+            <div class="line-total">${fmtCurrency(lineTotal)}</div>
+          </div>
+          <div class="expand-btn" id="${expandId}">▼</div>
+        </div>
+        <div class="compare-panel" id="${panelId}">
+          <div class="compare-title">🔍 Comparativo entre fornecedores — ${escHtml(item.name)}</div>
+          <div class="compare-grid">${compareCells}</div>
+        </div>
+      </div>`;
+    });
+
+    html += `</div>`;
+  });
+
+  // Items with no price
+  if (noPrice.length > 0) {
+    html += `<div class="cat-section" style="margin-top:20px">
+      <div class="cat-label" style="background:#2d2d2d;color:var(--muted)">⚠️ Itens sem cotação (${noPrice.length})</div>
+      ${noPrice.map(item => `
+        <div class="item-card" style="border-left-color:var(--border)">
+          <div class="item-main" style="cursor:default">
+            <div class="item-info">
+              <div class="item-name" style="color:var(--muted)">${escHtml(item.name)}</div>
+              <div class="item-desc">${escHtml(item.desc)}</div>
+            </div>
+            <div class="item-qty-unit">
+              <div class="qty-badge">${item.qty}</div>
+              <span>${escHtml(item.unit)}</span>
+            </div>
+            <div class="item-price-block">
+              <div style="font-size:12px;color:var(--muted)">Sem preço</div>
+            </div>
+          </div>
+        </div>`).join('')}
+    </div>`;
+  }
+
+  content.innerHTML = html;
+
+  // Update print header
+  document.getElementById('print-store-name').textContent = sup;
+  document.getElementById('print-meta').textContent =
+    `${items.length} itens · Total: ${fmtCurrency(total)} · Impresso em ${printDate}`;
+}
+
+// ── INTERACTIONS ─────────────────────────────────────────────
+window.setActiveSupplier = function(si) {
+  activeSupplierIdx = si;
+  renderAll();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+window.toggleCompare = function(itemId) {
+  const panel    = document.getElementById(`panel-${itemId}`);
+  const expandEl = document.getElementById(`expand-${itemId}`);
+  if (!panel) return;
+  const isOpen = panel.classList.toggle('open');
+  if (expandEl) {
+    expandEl.classList.toggle('open', isOpen);
+    expandEl.textContent = isOpen ? '▲' : '▼';
+  }
+};
+
+window.expandAllCompare = function() {
+  document.querySelectorAll('.compare-panel').forEach(p => p.classList.add('open'));
+  document.querySelectorAll('.expand-btn').forEach(b => { b.classList.add('open'); b.textContent = '▲'; });
+};
+
+window.collapseAllCompare = function() {
+  document.querySelectorAll('.compare-panel').forEach(p => p.classList.remove('open'));
+  document.querySelectorAll('.expand-btn').forEach(b => { b.classList.remove('open'); b.textContent = '▼'; });
+};
+
+window.printList = function() {
+  window.print();
+};
+
+// ── HELPERS ───────────────────────────────────────────────────
+function showError(msg) {
+  document.getElementById('content').innerHTML = `<div class="empty-state">
+    <div class="es-icon">❌</div>
+    <h3>Erro</h3>
+    <p>${escHtml(msg)}</p>
+    <br><a href="index.html" style="color:var(--accent)">← Voltar ao orçamento</a>
+  </div>`;
+  document.getElementById('stores-scroll').innerHTML = '';
+}
+
+function setSyncStatus(status) {
+  const dot   = document.getElementById('sync-dot');
+  const label = document.getElementById('sync-label');
+  dot.className = 'sync-dot ' + status;
+  const labels = { syncing: 'Carregando…', synced: 'Atualizado', error: 'Erro' };
+  label.textContent = labels[status] || 'Local';
+}
+
+function fmtCurrency(v) {
+  if (!v && v !== 0) return '';
+  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+}
+
+function fmtCurrencyRaw(v) {
+  if (!v) return '';
+  return 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function escHtml(str) {
+  return String(str || '')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function toast(msg, type = '') {
+  const c  = document.getElementById('toast-container');
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = msg;
+  c.appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
+</script>
+</body>
+</html>
