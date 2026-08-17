@@ -497,9 +497,11 @@ function analyze() {
     itemData[item.id] = { prices, minPrice, minSi };
   });
 
+  const activeItems = state.items.filter(item => !hiddenCats.has(item.cat));
+
   // Groups: items where supplier si is cheapest (or tied)
   const supGroups = state.suppliers.map((_, si) =>
-    state.items
+    activeItems
       .filter(item => {
         const d = itemData[item.id];
         return d.minPrice !== null && d.prices[si] === d.minPrice;
@@ -514,16 +516,16 @@ function analyze() {
   // Total per supplier of THEIR cheapest items
   const supTotals = supGroups.map(g => g.reduce((a, r) => a + r.total, 0));
 
-  // "Full list" total for each supplier (all items, regardless of cheapest)
+  // "Full list" total for each supplier (all active items)
   const supFullTotals = state.suppliers.map((_, si) =>
-    state.items.reduce((acc, item) => {
+    activeItems.reduce((acc, item) => {
       const p = state.prices[`${item.id}-${si}`];
       return acc + (p && p > 0 ? p * (item.qty || 0) : 0);
     }, 0)
   );
 
-  // Mixed shopping: for each item take the cheapest price
-  const mixedTotal = state.items.reduce((acc, item) => {
+  // Mixed shopping: for each active item take the cheapest price
+  const mixedTotal = activeItems.reduce((acc, item) => {
     const d = itemData[item.id];
     return acc + (d.minPrice !== null ? d.minPrice * (item.qty || 0) : 0);
   }, 0);
@@ -538,12 +540,12 @@ function analyze() {
   const minFull   = Math.min(...validFull.filter(t => t !== null));
   const cheapestFullIdx = supFullTotals.indexOf(minFull);
 
-  // Items with no price at all
-  const noPrice = state.items.filter(item => itemData[item.id].minPrice === null);
+  // Items with no price at all (active only)
+  const noPrice = activeItems.filter(item => itemData[item.id].minPrice === null);
 
   // Category-level totals per supplier
   const catTotals = {}; // cat → [total per si]
-  state.items.forEach(item => {
+  activeItems.forEach(item => {
     if (!catTotals[item.cat]) catTotals[item.cat] = state.suppliers.map(() => 0);
     itemData[item.id].prices.forEach((p, si) => {
       if (p !== null) catTotals[item.cat][si] += p * (item.qty || 0);

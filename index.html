@@ -389,6 +389,23 @@
       border-color: rgba(255, 255, 255, 0.1);
     }
 
+    .cat-ignored td {
+      opacity: 0.75;
+    }
+
+    .cat-ignored-badge {
+      font-size: 9px;
+      font-weight: 700;
+      background: rgba(248, 81, 73, 0.2);
+      color: #f85149;
+      border: 1px solid rgba(248, 81, 73, 0.4);
+      border-radius: 4px;
+      padding: 1px 6px;
+      margin-left: 6px;
+      text-transform: none;
+      letter-spacing: normal;
+    }
+
     /* Individual category header colors */
     .cat-1 td { background: var(--cat1); color: var(--cat1t); border-color: var(--cat1t); }
     .cat-2 td { background: var(--cat2); color: var(--cat2t); border-color: var(--cat2t); }
@@ -1299,7 +1316,8 @@ let state = {
   suppliers: [...DEFAULT_SUPPLIERS],
   items: [],
   prices: {},          // key: `${itemId}-${supplierIdx}`, value: number
-  collapsed: {},       // key: category, value: bool
+  collapsed: {},       // key: category, value: bool (visual collapse only)
+  hiddenCats: {},      // key: category, value: bool (excluded from totals + collapsed)
   hiddenSuppliers: {}, // key: supplier index, value: bool (minimized)
 };
 
@@ -1374,6 +1392,7 @@ async function initFirebase() {
       if (data.items)           state.items           = data.items;
       if (data.prices)          state.prices          = data.prices;
       if (data.hiddenSuppliers) state.hiddenSuppliers = data.hiddenSuppliers;
+      if (data.hiddenCats)      state.hiddenCats      = data.hiddenCats;
       renderAll();
     } else {
       // First time: save initial state
@@ -1396,6 +1415,7 @@ function serializeState() {
     items:           state.items,
     prices:          state.prices,
     hiddenSuppliers: state.hiddenSuppliers,
+    hiddenCats:      state.hiddenCats || {},
     updatedAt:       new Date().toISOString(),
   };
 }
@@ -1570,22 +1590,25 @@ function renderTableBody() {
   let html = "";
 
   Object.entries(cats).forEach(([cat, items]) => {
-    const meta   = CATEGORY_META[cat] || { id: 1, emoji: "📦", short: cat };
-    const catIdx = meta.id;
-    const isCollapsed = state.collapsed[cat];
+    const meta        = CATEGORY_META[cat] || { id: 1, emoji: "📦", short: cat };
+    const catIdx      = meta.id;
+    const isHidden    = Boolean(state.hiddenCats && state.hiddenCats[cat]);
+    const isCollapsed = isHidden ? true : Boolean(state.collapsed && state.collapsed[cat]);
 
     // Category header row
-    html += `<tr class="cat-header cat-${catIdx}" data-cat="${escHtml(cat)}">
+    html += `<tr class="cat-header cat-${catIdx}${isHidden ? ' cat-ignored' : ''}" data-cat="${escHtml(cat)}">
       <td colspan="${totalColCount()}">
         <div class="cat-header-content">
-          <span class="cat-header-title" onclick="toggleCat('${escHtml(cat)}')">
-            ${isCollapsed ? "▶" : "▼"} ${meta.emoji} ${cat}
+          <span class="cat-header-title" onclick="toggleCat('${escHtml(cat)}')" title="Clique no nome para recolher/expandir visualmente (mantém no total)">
+            <span style="font-size:10px">${isCollapsed ? "▶" : "▼"}</span>
+            <span>${meta.emoji} ${cat}</span>
             <span class="cat-count">(${items.length} itens)</span>
+            ${isHidden ? '<span class="cat-ignored-badge">🚫 Desconsiderado do total</span>' : ''}
           </span>
-          <button class="eye-btn${isCollapsed ? ' hidden-cat' : ''}"
-                  onclick="event.stopPropagation(); toggleCat('${escHtml(cat)}')"
-                  title="${isCollapsed ? 'Mostrar categoria' : 'Ocultar categoria'}">
-            ${isCollapsed ? '🙈' : '👁️'}
+          <button class="eye-btn${isHidden ? ' hidden-cat' : ''}"
+                  onclick="event.stopPropagation(); toggleCatEye('${escHtml(cat)}')"
+                  title="${isHidden ? 'Incluir categoria no total geral' : 'Desconsiderar categoria do total geral e encolher'}">
+            ${isHidden ? '🙈' : '👁️'}
           </button>
         </div>
       </td>
@@ -1675,8 +1698,11 @@ function fmtCurrencyRaw(v) {
 function renderTotals() {
   const tfoot = document.getElementById("totals-foot");
 
+  // Apenas itens de categorias ativas (não desconsideradas pelo botão de olho)
+  const activeItems = state.items.filter(item => !state.hiddenCats || !state.hiddenCats[item.cat]);
+
   const totals = state.suppliers.map((_, si) => {
-    return state.items.reduce((acc, item) => {
+    return activeItems.reduce((acc, item) => {
       const p = state.prices[`${item.id}-${si}`] || 0;
       return acc + p * (item.qty || 0);
     }, 0);
@@ -1708,12 +1734,15 @@ function renderTotals() {
 function renderSummaryBar() {
   const bar = document.getElementById("summary-bar");
 
+  // Apenas itens de categorias ativas (não desconsideradas pelo botão de olho)
+  const activeItems = state.items.filter(item => !state.hiddenCats || !state.hiddenCats[item.cat]);
+
   const totals = state.suppliers.map((sup, si) => {
-    const total = state.items.reduce((acc, item) => {
+    const total = activeItems.reduce((acc, item) => {
       const p = state.prices[`${item.id}-${si}`] || 0;
       return acc + p * (item.qty || 0);
     }, 0);
-    const filled = state.items.filter(item => state.prices[`${item.id}-${si}`] > 0).length;
+    const filled = activeItems.filter(item => state.prices[`${item.id}-${si}`] > 0).length;
     return { sup, si, total, filled };
   });
 
@@ -1733,7 +1762,7 @@ function renderSummaryBar() {
       ${isHidden
         ? `<div style="font-size:11px;color:var(--text-muted);margin-top:4px">Toque para expandir</div>`
         : `<div class="total-value">${total > 0 ? fmtCurrency(total) : "—"}</div>
-           <div class="items-filled">${filled} / ${state.items.length} itens cotados</div>
+           <div class="items-filled">${filled} / ${activeItems.length} itens cotados</div>
            <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>`
       }
     </div>`;
@@ -1891,11 +1920,28 @@ function updateRowDisplay(itemId) {
 }
 
 // ============================================================
-//  COLLAPSE CATEGORIES
+//  CATEGORY TOGGLES
 // ============================================================
+// Clicar no nome da categoria: apenas esconde/mostra visualmente, mantém valores no total
 window.toggleCat = function(cat) {
   state.collapsed[cat] = !state.collapsed[cat];
   renderTableBody();
+};
+
+// Clicar no botão de olho: encolhe E desconsidera valores do total geral
+window.toggleCatEye = function(cat) {
+  if (!state.hiddenCats) state.hiddenCats = {};
+  const isNowHidden = !state.hiddenCats[cat];
+  state.hiddenCats[cat] = isNowHidden;
+  if (isNowHidden) {
+    state.collapsed[cat] = true;
+  } else {
+    state.collapsed[cat] = false;
+  }
+  renderTableBody();
+  renderTotals();
+  renderSummaryBar();
+  scheduleSave();
 };
 
 window.expandAll  = function() { [...new Set(state.items.map(i => i.cat))].forEach(c => state.collapsed[c] = false); renderTableBody(); };
