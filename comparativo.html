@@ -467,6 +467,10 @@ const hiddenCats = new Set(); // categories hidden by the eye toggle
       state.suppliers = d.suppliers || [];
       state.items     = d.items     || [];
       state.prices    = d.prices    || {};
+      if (d.hiddenCats && Array.isArray(d.hiddenCats)) {
+        hiddenCats.clear();
+        d.hiddenCats.forEach(c => hiddenCats.add(c));
+      }
       renderAll();
     };
 

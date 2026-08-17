@@ -1392,7 +1392,14 @@ async function initFirebase() {
       if (data.items)           state.items           = data.items;
       if (data.prices)          state.prices          = data.prices;
       if (data.hiddenSuppliers) state.hiddenSuppliers = data.hiddenSuppliers;
-      if (data.hiddenCats)      state.hiddenCats      = data.hiddenCats;
+      if (data.hiddenCats) {
+        state.hiddenCats = {};
+        if (Array.isArray(data.hiddenCats)) {
+          data.hiddenCats.forEach(c => { state.hiddenCats[c] = true; });
+        } else if (typeof data.hiddenCats === 'object') {
+          Object.entries(data.hiddenCats).forEach(([k, v]) => { if (v) state.hiddenCats[k] = true; });
+        }
+      }
       renderAll();
     } else {
       // First time: save initial state
@@ -1410,12 +1417,13 @@ async function initFirebase() {
 }
 
 function serializeState() {
+  const hiddenCatsList = Object.keys(state.hiddenCats || {}).filter(k => state.hiddenCats[k]);
   return {
     suppliers:       state.suppliers,
     items:           state.items,
     prices:          state.prices,
     hiddenSuppliers: state.hiddenSuppliers,
-    hiddenCats:      state.hiddenCats || {},
+    hiddenCats:      hiddenCatsList,
     updatedAt:       new Date().toISOString(),
   };
 }
@@ -1449,6 +1457,14 @@ function loadFromLocal() {
     state.items           = data.items           || state.items;
     state.prices          = data.prices          || state.prices;
     state.hiddenSuppliers = data.hiddenSuppliers || state.hiddenSuppliers;
+    if (data.hiddenCats) {
+      state.hiddenCats = {};
+      if (Array.isArray(data.hiddenCats)) {
+        data.hiddenCats.forEach(c => { state.hiddenCats[c] = true; });
+      } else if (typeof data.hiddenCats === 'object') {
+        Object.entries(data.hiddenCats).forEach(([k, v]) => { if (v) state.hiddenCats[k] = true; });
+      }
+    }
     return true;
   } catch(e) { return false; }
 }
