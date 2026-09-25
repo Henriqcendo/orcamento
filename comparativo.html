@@ -74,7 +74,13 @@
     .store-tab.active .st-name  { color:var(--green); }
     .store-tab .st-items { font-size:10px; color:var(--muted); margin-top:2px; }
     .store-tab .st-total { font-size:14px; font-weight:800; margin-top:4px; }
-    .store-tab.active .st-total { color:var(--green); }
+    .store-tab.total-tab {
+      border-color: rgba(63, 185, 80, 0.45);
+      background: linear-gradient(135deg, rgba(63, 185, 80, 0.08), var(--surface2));
+    }
+    .store-tab.total-tab:hover { border-color: var(--green); }
+    .store-tab.total-tab.active { border-color: var(--green); background: var(--green-bg); }
+    .store-tab.total-tab .st-total { color: var(--green); }
     .badge-best {
       background:var(--green); color:#000; font-size:9px;
       padding:1px 5px; border-radius:10px; font-weight:700;
@@ -98,7 +104,89 @@
     .btn-ghost:hover { background:var(--border); }
     .btn-print  { background:linear-gradient(135deg,var(--accent),#4a9eff); color:#fff; }
     .btn-print:hover { transform:translateY(-1px); box-shadow:0 4px 16px rgba(88,166,255,.3); }
+    .btn-print-store { background:var(--surface2); color:var(--text); border:1px solid var(--border); }
+    .btn-print-store:hover { background:var(--border); color:#fff; }
+    .btn-print-total { background:linear-gradient(135deg,#238636,#2ea043); color:#fff; box-shadow:0 2px 8px rgba(35,134,54,.3); }
+    .btn-print-total:hover { transform:translateY(-1px); box-shadow:0 4px 16px rgba(46,160,67,.4); }
     @media(max-width:480px){ .btn span{display:none} .btn{padding:8px} }
+
+    /* ── TOTAL PURCHASE HERO CARD ── */
+    .total-purchase-hero {
+      background: linear-gradient(135deg, rgba(63, 185, 80, 0.12), rgba(63, 185, 80, 0.04));
+      border: 1px solid rgba(63, 185, 80, 0.35);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+    .tph-main {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .tph-left {}
+    .tph-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      color: #3fb950;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 4px;
+    }
+    .tph-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text);
+      margin: 0;
+    }
+    .tph-sub {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    .tph-right {
+      text-align: right;
+    }
+    .tph-val {
+      font-size: 26px;
+      font-weight: 800;
+      color: #3fb950;
+      letter-spacing: -0.5px;
+    }
+    .tph-items {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    .tph-breakdown {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 12px;
+    }
+    .tph-breakdown-lbl {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .tph-store-tag {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 3px 8px;
+      font-size: 11px;
+      color: var(--text);
+    }
+    .tph-store-tag strong {
+      color: #3fb950;
+    }
 
     /* ── CONTENT ── */
     .content { padding:16px 20px 100px; max-width:980px; margin:0 auto; }
@@ -358,27 +446,136 @@
     @keyframes toastIn  { from{opacity:0;transform:translateY(20px)} }
     @keyframes toastOut { to  {opacity:0;transform:translateY(20px)} }
 
-    /* ── PRINT ── */
-    .print-header { display:none; }
+    /* ── PRINT MODES ── */
+    #print-store-container, #print-total-container { display: none; }
+
     @media print {
-      header,.stores-scroll,.toolbar,.expand-btn,
-      .compare-panel,#toast-container { display:none !important; }
-      .print-header { display:block !important; padding-bottom:10px;
-        border-bottom:2px solid #000; margin-bottom:12px; }
-      .print-header h2 { font-size:16px; font-weight:800; color:#000; }
-      .print-header p  { font-size:11px; color:#555; }
-      body { background:#fff !important; color:#000 !important; font-size:11px; }
-      .content { padding:0 !important; max-width:100% !important; }
-      .global-card, .store-header-card, .item-card, .cat-subtotal {
-        background:#f5f5f5 !important; border:1px solid #ccc !important;
-        -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important;
+      header, .stores-scroll, .toolbar, .content, .print-header, #toast-container {
+        display: none !important;
       }
-      .item-name,.shc-title,.scc-total,.csc-total,.line-total { color:#000 !important; }
-      .sup-compare-card.is-cheapest .scc-total,
-      .cat-sub-cell.is-cheapest .csc-total,
-      .mixed-total, .shc-total-val, .line-total { color:#1a6b2e !important; }
-      .cat-label { -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
-      @page { margin:12mm 10mm; }
+
+      body {
+        background: #fff !important;
+        color: #000 !important;
+        font-family: var(--font), Arial, sans-serif !important;
+        font-size: 11px;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+
+      body.print-mode-store #print-store-container {
+        display: block !important;
+        width: 100% !important;
+      }
+
+      body.print-mode-total #print-total-container {
+        display: block !important;
+        width: 100% !important;
+      }
+
+      .print-sheet {
+        width: 100%;
+        color: #000;
+        font-size: 11px;
+      }
+
+      .print-sheet-header {
+        border-bottom: 2px solid #000;
+        padding-bottom: 8px;
+        margin-bottom: 12px;
+      }
+
+      .print-title {
+        font-size: 16px;
+        font-weight: 800;
+        margin: 0 0 3px 0;
+        color: #000;
+      }
+
+      .print-subtitle {
+        font-size: 11px;
+        color: #444;
+        margin: 0 0 8px 0;
+      }
+
+      .print-meta-grid {
+        display: grid;
+        grid-template-columns: 1.5fr 1fr;
+        gap: 6px 16px;
+        font-size: 11px;
+        margin-top: 6px;
+      }
+
+      .print-table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        margin-top: 8px;
+        font-size: 10.5px;
+      }
+
+      .print-table th, .print-table td {
+        border: 1px solid #333 !important;
+        padding: 6px 7px;
+        vertical-align: middle;
+      }
+
+      .print-table thead th {
+        background: #f0f0f0 !important;
+        color: #000 !important;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 10px;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      .print-table tr {
+        page-break-inside: avoid;
+        break-inside: avoid;
+      }
+
+      .print-cat-row td {
+        background: #e9ecef !important;
+        font-weight: 700;
+        font-size: 10px;
+        padding: 5px 7px !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      .print-total-row td {
+        background: #f5f5f5 !important;
+        font-weight: 800;
+        font-size: 11px;
+        border-top: 2px solid #000 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      .print-total-label {
+        text-align: right !important;
+        padding-right: 12px !important;
+      }
+
+      .print-summary-box {
+        margin-top: 14px;
+        border: 1px solid #777;
+        border-radius: 4px;
+        padding: 8px 12px;
+        font-size: 11px;
+        background: #fafafa !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        page-break-inside: avoid;
+        break-inside: avoid;
+      }
+
+      .print-summary-title {
+        font-weight: 700;
+        margin-bottom: 6px;
+      }
+
+      @page { margin: 10mm; size: A4 portrait; }
     }
   </style>
 </head>
@@ -410,12 +607,22 @@
 <div class="toolbar">
   <button class="btn btn-ghost" onclick="expandAllCompare()">👁️ <span>Ver comparativos</span></button>
   <button class="btn btn-ghost" onclick="collapseAllCompare()">🙈 <span>Recolher</span></button>
-  <button class="btn btn-print" onclick="window.print()">🖨️ <span>Imprimir lista</span></button>
+  <div style="flex:1"></div>
+  <button class="btn btn-print-store" id="btn-print-store" onclick="printStoreList()" title="Imprimir lista de compras da loja selecionada">
+    🏪 <span>Imprimir desta Loja</span>
+  </button>
+  <button class="btn btn-print-total" onclick="printTotalList()" title="Imprimir lista completa com todos os itens e onde comprar mais barato">
+    📋 <span>Imprimir Lista Total (Geral)</span>
+  </button>
 </div>
 
 <div class="content" id="content">
   <div class="loading"><div class="spinner"></div><p>Carregando dados…</p></div>
 </div>
+
+<!-- Containers de impressão dedicados -->
+<div id="print-store-container"></div>
+<div id="print-total-container"></div>
 
 <div id="toast-container"></div>
 
@@ -441,7 +648,7 @@ const CATEGORY_META = {
 };
 
 let state = { suppliers:[], items:[], prices:{} };
-let activeSupplierIdx = 0;
+let activeSupplierIdx = -1; // -1 = Total Geral (todas as lojas)
 const hiddenCats = new Set(); // categories hidden by the eye toggle
 
 // ── INIT ─────────────────────────────────────────────
@@ -450,6 +657,34 @@ const hiddenCats = new Set(); // categories hidden by the eye toggle
   const orcId  = params.get('id');
   if (orcId) document.getElementById('back-link').href = `index.html?id=${orcId}`;
 
+  const load = d => {
+    state.suppliers = d.suppliers || [];
+    state.items     = d.items     || [];
+    state.prices    = d.prices    || {};
+    if (d.hiddenCats) {
+      hiddenCats.clear();
+      if (Array.isArray(d.hiddenCats)) {
+        d.hiddenCats.forEach(c => hiddenCats.add(c));
+      } else if (typeof d.hiddenCats === 'object') {
+        Object.entries(d.hiddenCats).forEach(([k, v]) => { if (v) hiddenCats.add(k); });
+      }
+    }
+    renderAll();
+  };
+
+  if (!orcId) {
+    try {
+      const raw = localStorage.getItem("orcamento-state");
+      if (raw) {
+        load(JSON.parse(raw));
+        setSyncStatus('synced');
+        return;
+      }
+    } catch(e) {}
+    showError('Acesse pelo link da página principal ou monte um orçamento localmente.');
+    return;
+  }
+
   try {
     const { initializeApp }          = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
     const { getDatabase, ref, get, onValue } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js");
@@ -457,22 +692,21 @@ const hiddenCats = new Set(); // categories hidden by the eye toggle
     const app  = initializeApp(FIREBASE_CONFIG);
     const rtdb = getDatabase(app);
 
-    if (!orcId) { showError('Acesse pelo link da página principal.'); return; }
-
     setSyncStatus('syncing');
     const snap = await get(ref(rtdb, `orcamentos/${orcId}`));
-    if (!snap.exists()) { showError('Orçamento não encontrado.'); setSyncStatus('error'); return; }
-
-    const load = d => {
-      state.suppliers = d.suppliers || [];
-      state.items     = d.items     || [];
-      state.prices    = d.prices    || {};
-      if (d.hiddenCats && Array.isArray(d.hiddenCats)) {
-        hiddenCats.clear();
-        d.hiddenCats.forEach(c => hiddenCats.add(c));
-      }
-      renderAll();
-    };
+    if (!snap.exists()) {
+      try {
+        const raw = localStorage.getItem("orcamento-state");
+        if (raw) {
+          load(JSON.parse(raw));
+          setSyncStatus('synced');
+          return;
+        }
+      } catch(e) {}
+      showError('Orçamento não encontrado.');
+      setSyncStatus('error');
+      return;
+    }
 
     load(snap.val());
     setSyncStatus('synced');
@@ -481,6 +715,14 @@ const hiddenCats = new Set(); // categories hidden by the eye toggle
 
   } catch(e) {
     console.error(e);
+    try {
+      const raw = localStorage.getItem("orcamento-state");
+      if (raw) {
+        load(JSON.parse(raw));
+        setSyncStatus('synced');
+        return;
+      }
+    } catch(err) {}
     setSyncStatus('error');
     showError('Erro Firebase: ' + e.message);
   }
@@ -568,9 +810,20 @@ function renderAll() {
   renderContent(a);
 }
 
-function renderTabs({ supGroups, supTotals, cheapestGroupIdx }) {
+function renderTabs({ supGroups, supTotals, cheapestGroupIdx, mixedTotal }) {
   const bar = document.getElementById('stores-scroll');
-  bar.innerHTML = state.suppliers.map((sup, si) => {
+  const activeItems = state.items.filter(item => !hiddenCats.has(item.cat));
+  const activeCount = activeItems.length;
+
+  const totalTabHtml = `
+    <div class="store-tab total-tab${activeSupplierIdx === -1 ? ' active' : ''}" onclick="setActiveSupplier(-1)" title="Ver lista geral com todas as lojas">
+      <div class="st-name">🛒 Total Geral <span class="badge-best">Melhor Preço</span></div>
+      <div class="st-items">${activeCount} iten${activeCount!==1?'s':''} cotados</div>
+      <div class="st-total">${mixedTotal > 0 ? fmtCurrency(mixedTotal) : '—'}</div>
+    </div>
+  `;
+
+  const storesHtml = state.suppliers.map((sup, si) => {
     const count  = supGroups[si].length;
     const total  = supTotals[si];
     const isBest = si === cheapestGroupIdx && count > 0;
@@ -580,6 +833,8 @@ function renderTabs({ supGroups, supTotals, cheapestGroupIdx }) {
       <div class="st-total">${total > 0 ? fmtCurrency(total) : '—'}</div>
     </div>`;
   }).join('');
+
+  bar.innerHTML = totalTabHtml + storesHtml;
 }
 
 function renderContent(a) {
@@ -587,10 +842,26 @@ function renderContent(a) {
           cheapestGroupIdx, cheapestFullIdx, mixedTotal,
           noPrice, catTotals } = a;
 
-  const si    = activeSupplierIdx;
-  const sup   = state.suppliers[si];
-  const items = supGroups[si];
-  const total = supTotals[si];
+  const isTotalView = activeSupplierIdx === -1;
+  const si    = isTotalView ? -1 : activeSupplierIdx;
+  const sup   = isTotalView ? 'Todas as Lojas (Total Geral)' : (state.suppliers[si] || `Loja ${si+1}`);
+
+  const activeItems = state.items.filter(item => !hiddenCats.has(item.cat));
+  const itemsWithPrice = activeItems.filter(item => itemData[item.id].minPrice !== null);
+
+  const items = isTotalView
+    ? activeItems.map(item => {
+        const d = itemData[item.id];
+        const p = d.minPrice || 0;
+        return {
+          item,
+          price: p,
+          total: p * (item.qty || 0),
+        };
+      })
+    : (supGroups[si] || []);
+
+  const total = isTotalView ? mixedTotal : (supTotals[si] || 0);
 
   const content = document.getElementById('content');
   if (state.items.length === 0) {
@@ -629,7 +900,56 @@ function renderContent(a) {
   const cheapSupName = state.suppliers[cheapestFullIdx] || '—';
   const globalSummary = cheapFull > 0 ? `Menor: <strong style="color:var(--green)">${escHtml(cheapSupName)} ${fmtCurrency(cheapFull)}</strong>` : 'Preencha preços';
 
-  let html = `
+  const storeBreakdownHtml = state.suppliers.map((s, sIdx) => {
+    const count = supGroups[sIdx].length;
+    const tot   = supTotals[sIdx];
+    if (count === 0) return '';
+    return `<span class="tph-store-tag"><strong>${escHtml(s)}:</strong> ${fmtCurrency(tot)} (${count} ite${count>1?'ns':'m'})</span>`;
+  }).filter(Boolean).join('');
+
+  const btnStore = document.getElementById('btn-print-store');
+  if (btnStore) {
+    if (isTotalView) {
+      btnStore.style.display = 'none';
+    } else {
+      btnStore.style.display = 'inline-flex';
+      btnStore.innerHTML = `🏪 <span>Imprimir desta Loja (${escHtml(sup)})</span>`;
+    }
+  }
+
+  let html = ``;
+
+  // ── 1. HEADER (DIFERENCIADO POR ABA) ───────────────
+  if (isTotalView) {
+    html += `
+    <div class="store-header-card" style="border-left:4px solid var(--green)">
+      <div>
+        <div class="shc-title">🛒 Todas as Lojas — Lista Consolidada</div>
+        <div class="shc-meta">${activeItems.length} itens cotados com o menor preço apurado</div>
+      </div>
+      <div class="shc-total-block">
+        <div class="shc-total-lbl">Valor Total da Compra</div>
+        <div class="shc-total-val" style="color:var(--green)">${mixedTotal > 0 ? fmtCurrency(mixedTotal) : '—'}</div>
+      </div>
+    </div>
+    ${storeBreakdownHtml ? `<div class="tph-breakdown" style="margin-bottom:18px;border:none;padding:0"><span class="tph-breakdown-lbl">Distribuição por loja:</span> ${storeBreakdownHtml}</div>` : ''}`;
+  } else {
+    const isBest = si === cheapestFullIdx && supFullTotals[si] > 0;
+    html += `
+    <div class="store-header-card">
+      <div>
+        <div class="shc-title">🏪 ${escHtml(sup)}</div>
+        <div class="shc-meta">${items.length} iten${items.length!==1?'s':''} com menor preço nesta loja${isBest?' · ✅ Loja com menor total geral':''}</div>
+      </div>
+      <div class="shc-total-block">
+        <div class="shc-total-lbl">Total desta lista</div>
+        <div class="shc-total-val">${total > 0 ? fmtCurrency(total) : '—'}</div>
+      </div>
+    </div>`;
+  }
+
+  // ── 2. GLOBAL COMPARISON CARD ──────────────────────
+  html += `
   <div class="global-card">
     <div class="gc-header" onclick="toggleGlobal()">
       <div>
@@ -659,21 +979,7 @@ function renderContent(a) {
     </div>
   </div>`;
 
-  // ── 2. STORE HEADER ────────────────────────────────
-  const isBest = si === cheapestFullIdx && supFullTotals[si] > 0;
-  html += `
-  <div class="store-header-card">
-    <div>
-      <div class="shc-title">🏪 ${escHtml(sup)}</div>
-      <div class="shc-meta">${items.length} iten${items.length!==1?'s':''} com menor preço nesta loja${isBest?' · ✅ Loja com menor total geral':''}</div>
-    </div>
-    <div class="shc-total-block">
-      <div class="shc-total-lbl">Total desta lista</div>
-      <div class="shc-total-val">${total > 0 ? fmtCurrency(total) : '—'}</div>
-    </div>
-  </div>`;
-
-  if (items.length === 0) {
+  if (!isTotalView && items.length === 0) {
     html += `<div class="empty-state"><div class="es-icon">🤔</div>
       <h3>Nenhum item mais barato em ${escHtml(sup)}</h3>
       <p>Preencha os preços desta loja no orçamento.</p></div>`;
@@ -715,7 +1021,7 @@ function renderContent(a) {
       const compCells = state.suppliers.map((sName, sIdx) => {
         const p       = d.prices[sIdx];
         const isBestS = p !== null && p === d.minPrice;
-        const isCurr  = sIdx === si;
+        const isCurr  = isTotalView ? isBestS : (sIdx === si);
         const diffR   = p !== null && !isBestS ? p - d.minPrice : null;
         const diffP   = diffR !== null && d.minPrice > 0 ? ((diffR/d.minPrice)*100).toFixed(1) : null;
         const lineT   = p !== null ? p * (item.qty||0) : null;
@@ -737,16 +1043,27 @@ function renderContent(a) {
         </div>`;
       }).join('');
 
+      let bestStoreLabel = '';
+      if (isTotalView) {
+        if (d.minPrice !== null) {
+          const tied = state.suppliers.filter((_, sIdx) => d.prices[sIdx] === d.minPrice);
+          bestStoreLabel = `<div style="font-size:11px;font-weight:700;color:var(--green);margin-top:3px">🏪 ${tied.map(s => escHtml(s)).join(' / ')}</div>`;
+        } else {
+          bestStoreLabel = `<div style="font-size:11px;color:var(--muted);margin-top:3px">⚠️ Sem cotação</div>`;
+        }
+      }
+
       html += `<div class="item-card">
         <div class="item-main" onclick="toggleCompare('${item.id}')">
           <div class="item-info">
             <div class="item-name">${escHtml(item.name)}</div>
             <div class="item-desc">${escHtml(item.desc)}</div>
+            ${bestStoreLabel}
           </div>
           <div class="item-qty-unit"><div class="qty-badge">${item.qty}</div><span>${escHtml(item.unit)}</span></div>
           <div class="item-price-block">
-            <div class="unit-price">${fmtCurrencyRaw(price)} / ${escHtml(item.unit)}</div>
-            <div class="line-total">${fmtCurrency(lineTotal)}</div>
+            <div class="unit-price">${price > 0 ? fmtCurrencyRaw(price) : '—'} / ${escHtml(item.unit)}</div>
+            <div class="line-total">${lineTotal > 0 ? fmtCurrency(lineTotal) : '—'}</div>
           </div>
           <div class="expand-btn" id="expand-${item.id}">▼</div>
         </div>
@@ -897,9 +1214,238 @@ function fmtCurrencyRaw(v) {
   if (!v) return '';
   return 'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 }
+window.printStoreList = function() {
+  const container = document.getElementById('print-store-container');
+  if (!container) return;
+
+  const a = analyze();
+  const si = activeSupplierIdx;
+  const sup = state.suppliers[si] || `Loja ${si+1}`;
+  const rows = a.supGroups[si] || [];
+  const total = a.supTotals[si] || 0;
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+  // Agrupa itens da loja por categoria
+  const byCat = {};
+  rows.forEach(r => {
+    const cat = r.item.cat || 'Outros';
+    if (!byCat[cat]) byCat[cat] = [];
+    byCat[cat].push(r);
+  });
+
+  let html = `
+    <div class="print-sheet">
+      <div class="print-sheet-header">
+        <h2 class="print-title">🏗️ LISTA DE COMPRAS — ${escHtml(sup).toUpperCase()}</h2>
+        <div class="print-subtitle">Itens selecionados com o menor preço nesta loja</div>
+        <div class="print-meta-grid">
+          <div><strong>Fornecedor:</strong> ${escHtml(sup)}</div>
+          <div><strong>Data:</strong> ${dateStr}</div>
+          <div><strong>Qtd. de Itens:</strong> ${rows.length} itens</div>
+          <div><strong>Total a Comprar:</strong> <strong style="color:#1a6b2e;">${fmtCurrency(total)}</strong></div>
+        </div>
+      </div>
+
+      <table class="print-table">
+        <thead>
+          <tr>
+            <th style="width:25%; text-align:left;">Item</th>
+            <th style="width:40%; text-align:left;">Descrição</th>
+            <th style="width:9%; text-align:center;">Unid.</th>
+            <th style="width:8%; text-align:center;">Qtd.</th>
+            <th style="width:9%; text-align:right;">Preço Unit.</th>
+            <th style="width:9%; text-align:right;">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+  `;
+
+  if (rows.length === 0) {
+    html += `<tr><td colspan="6" style="text-align:center; padding:16px;">Nenhum item com menor preço nesta loja.</td></tr>`;
+  } else {
+    Object.entries(byCat).forEach(([cat, catRows]) => {
+      html += `
+        <tr class="print-cat-row">
+          <td colspan="6"><strong>${escHtml(cat)}</strong></td>
+        </tr>
+      `;
+      catRows.forEach(({ item, price, total: lineTotal }) => {
+        html += `
+          <tr>
+            <td><strong>${escHtml(item.name)}</strong></td>
+            <td>${escHtml(item.desc || '—')}</td>
+            <td style="text-align:center;">${escHtml(item.unit || '—')}</td>
+            <td style="text-align:center; font-weight:600;">${item.qty}</td>
+            <td style="text-align:right;">${fmtCurrency(price)}</td>
+            <td style="text-align:right; font-weight:600;">${fmtCurrency(lineTotal)}</td>
+          </tr>
+        `;
+      });
+    });
+  }
+
+  html += `
+        </tbody>
+        <tfoot>
+          <tr class="print-total-row">
+            <td colspan="4" class="print-total-label">TOTAL NESTA LOJA:</td>
+            <td colspan="2" style="text-align:right; font-weight:800; font-size:12px; color:#1a6b2e;">${fmtCurrency(total)}</td>
+          </tr>
+        </tfoot>
+      </table>
+
+      <div class="print-summary-box">
+        <div class="print-summary-title">Instruções / Observações:</div>
+        <div>Entregar no endereço da obra conforme combinado. Prazo de entrega e notas fiscais a faturar.</div>
+      </div>
+    </div>
+  `;
+
+  container.innerHTML = html;
+  document.body.classList.remove('print-mode-total');
+  document.body.classList.add('print-mode-store');
+
+  const cleanup = () => {
+    document.body.classList.remove('print-mode-store');
+    window.removeEventListener('afterprint', cleanup);
+  };
+  window.addEventListener('afterprint', cleanup);
+
+  setTimeout(() => {
+    window.print();
+    setTimeout(cleanup, 2500);
+  }, 100);
+};
+
+window.printTotalList = function() {
+  const container = document.getElementById('print-total-container');
+  if (!container) return;
+
+  const a = analyze();
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+  const activeItems = state.items.filter(item => !hiddenCats.has(item.cat));
+
+  // Agrupa todos os itens ativos por categoria
+  const byCat = {};
+  activeItems.forEach(item => {
+    const cat = item.cat || 'Outros';
+    if (!byCat[cat]) byCat[cat] = [];
+    byCat[cat].push(item);
+  });
+
+  // Resumo de lojas
+  const storeSummaryHtml = state.suppliers.map((s, si) => {
+    const count = a.supGroups[si].length;
+    const tot   = a.supTotals[si];
+    if (count === 0) return '';
+    return `<div style="display:inline-block; margin-right:16px; margin-bottom:4px;"><strong>${escHtml(s)}:</strong> ${fmtCurrency(tot)} (${count} ite${count>1?'ns':'m'})</div>`;
+  }).filter(Boolean).join('');
+
+  let html = `
+    <div class="print-sheet">
+      <div class="print-sheet-header">
+        <h2 class="print-title">🏗️ LISTA GERAL DE COMPRAS — MENOR PREÇO POR ITEM</h2>
+        <div class="print-subtitle">Relação completa de todos os itens da obra e fornecedor onde cada produto está mais barato</div>
+        <div class="print-meta-grid">
+          <div><strong>Data de Emissão:</strong> ${dateStr}</div>
+          <div><strong>Qtd. Total de Itens:</strong> ${activeItems.length} itens</div>
+          <div><strong>Total de Fornecedores Cotados:</strong> ${state.suppliers.length} lojas</div>
+          <div><strong>VALOR TOTAL DA COMPRA:</strong> <strong style="font-size:13px; color:#1a6b2e;">${fmtCurrency(a.mixedTotal)}</strong></div>
+        </div>
+      </div>
+
+      <div class="print-summary-box" style="margin-top:0; margin-bottom:10px;">
+        <div class="print-summary-title">Distribuição da compra por fornecedor:</div>
+        <div>${storeSummaryHtml || 'Nenhum fornecedor com preços cotados.'}</div>
+      </div>
+
+      <table class="print-table">
+        <thead>
+          <tr>
+            <th style="width:20%; text-align:left;">Item</th>
+            <th style="width:32%; text-align:left;">Descrição</th>
+            <th style="width:7%; text-align:center;">Unid.</th>
+            <th style="width:6%; text-align:center;">Qtd.</th>
+            <th style="width:17%; text-align:left;">Loja Mais Barata</th>
+            <th style="width:9%; text-align:right;">Preço Unit.</th>
+            <th style="width:9%; text-align:right;">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+  `;
+
+  Object.entries(byCat).forEach(([cat, items]) => {
+    html += `
+      <tr class="print-cat-row">
+        <td colspan="7"><strong>${escHtml(cat)}</strong></td>
+      </tr>
+    `;
+
+    items.forEach(item => {
+      const d = a.itemData[item.id];
+      const hasPrice = d.minPrice !== null;
+      let storeName = '— Sem cotação —';
+      if (hasPrice) {
+        const tiedStores = state.suppliers.filter((_, si) => d.prices[si] === d.minPrice);
+        storeName = tiedStores.map(s => escHtml(s)).join(' / ');
+      }
+      const unitPriceStr = hasPrice ? fmtCurrency(d.minPrice) : '—';
+      const lineTotal = hasPrice ? d.minPrice * (item.qty || 0) : 0;
+      const totalStr = hasPrice ? fmtCurrency(lineTotal) : '—';
+
+      html += `
+        <tr>
+          <td><strong>${escHtml(item.name)}</strong></td>
+          <td>${escHtml(item.desc || '—')}</td>
+          <td style="text-align:center;">${escHtml(item.unit || '—')}</td>
+          <td style="text-align:center; font-weight:600;">${item.qty}</td>
+          <td><strong style="color:#000;">${storeName}</strong></td>
+          <td style="text-align:right;">${unitPriceStr}</td>
+          <td style="text-align:right; font-weight:600;">${totalStr}</td>
+        </tr>
+      `;
+    });
+  });
+
+  html += `
+        </tbody>
+        <tfoot>
+          <tr class="print-total-row">
+            <td colspan="5" class="print-total-label">VALOR TOTAL GERAL DA COMPRA:</td>
+            <td colspan="2" style="text-align:right; font-weight:800; font-size:12px; color:#1a6b2e;">${fmtCurrency(a.mixedTotal)}</td>
+          </tr>
+        </tfoot>
+      </table>
+
+      <div class="print-summary-box">
+        <div class="print-summary-title">Observações Gerais:</div>
+        <div>Esta lista reflete o menor preço de cada insumo apurado entre todas as cotações salvas no sistema.</div>
+      </div>
+    </div>
+  `;
+
+  container.innerHTML = html;
+  document.body.classList.remove('print-mode-store');
+  document.body.classList.add('print-mode-total');
+
+  const cleanup = () => {
+    document.body.classList.remove('print-mode-total');
+    window.removeEventListener('afterprint', cleanup);
+  };
+  window.addEventListener('afterprint', cleanup);
+
+  setTimeout(() => {
+    window.print();
+    setTimeout(cleanup, 2500);
+  }, 100);
+};
+
 function escHtml(str) {
-  return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 </script>
 </body>

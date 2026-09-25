@@ -978,46 +978,173 @@
     }
 
     /* =========================================================
-       PRINT STYLES — BLANK FORM MODE
+       PRINT STYLES — BLANK FORM MODE (TABELA BÁSICA DE COTAÇÃO)
     ========================================================= */
+    #print-blank-container {
+      display: none;
+    }
+
     @media print {
-      /* Notice banner */
-      body.print-blank .print-blank-notice { display: block !important; }
-
-      /* Price cells: empty underlined box */
-      body.print-blank td.td-price {
-        border-bottom: 2px solid #333 !important;
-        background: transparent !important;
-      }
-      body.print-blank td.td-price::after {
-        content: "R$" !important;
-        color: #999 !important;
-        font-size: 9px !important;
-        float: left !important;
+      body.print-blank-mode header,
+      body.print-blank-mode .toolbar,
+      body.print-blank-mode .summary-bar,
+      body.print-blank-mode .table-wrapper,
+      body.print-blank-mode .print-header,
+      body.print-blank-mode .setup-banner,
+      body.print-blank-mode #toast-container,
+      body.print-blank-mode .modal-overlay {
+        display: none !important;
       }
 
-      /* Total cells: empty underlined box */
-      body.print-blank td.td-total {
-        border-bottom: 2px solid #333 !important;
-        background: transparent !important;
-      }
-
-      /* Grand totals: underlined boxes */
-      body.print-blank .grand-total {
-        border-bottom: 2px solid #000 !important;
-        min-width: 100px;
-        display: inline-block;
-      }
-
-      /* Remove best-price green in blank mode */
-      body.print-blank td.best-price {
-        background: transparent !important;
-      }
-
-      /* Supplier name header: underline hint */
-      body.print-blank .supplier-name-input {
-        border-bottom: 1px solid #555 !important;
+      body.print-blank-mode {
+        background: #fff !important;
         color: #000 !important;
+        font-family: var(--font), Arial, sans-serif !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+
+      body.print-blank-mode #print-blank-container {
+        display: block !important;
+        width: 100% !important;
+      }
+
+      .blank-print-sheet {
+        width: 100%;
+        color: #000;
+        font-size: 11px;
+      }
+
+      .blank-sheet-header {
+        border-bottom: 2px solid #000;
+        padding-bottom: 8px;
+        margin-bottom: 10px;
+      }
+
+      .blank-title-box h2 {
+        font-size: 16px;
+        font-weight: 800;
+        margin: 0 0 3px 0;
+        color: #000;
+      }
+
+      .blank-title-box .blank-subtitle {
+        font-size: 11px;
+        color: #444;
+        margin: 0 0 8px 0;
+      }
+
+      .blank-meta-grid {
+        display: grid;
+        grid-template-columns: 1.5fr 1fr;
+        gap: 6px 16px;
+        font-size: 11px;
+        margin-top: 6px;
+      }
+
+      .blank-meta-field {
+        color: #222;
+      }
+
+      /* Tabela Básica Simples de Cotação */
+      .blank-simple-table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        margin-top: 8px;
+        font-size: 10.5px;
+      }
+
+      .blank-simple-table th,
+      .blank-simple-table td {
+        border: 1px solid #333 !important;
+        padding: 6px 7px;
+        vertical-align: middle;
+      }
+
+      .blank-simple-table thead th {
+        background: #f0f0f0 !important;
+        color: #000 !important;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 10px;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      .blank-simple-table tr {
+        page-break-inside: avoid;
+        break-inside: avoid;
+      }
+
+      .bth-item        { width: 22%; text-align: left; }
+      .bth-desc        { width: 38%; text-align: left; }
+      .bth-unit        { width: 8%;  text-align: center; }
+      .bth-qty         { width: 8%;  text-align: center; }
+      .bth-unit-price  { width: 12%; text-align: right; }
+      .bth-total-price { width: 12%; text-align: right; }
+
+      .btd-item        { font-weight: 600; color: #000; }
+      .btd-desc        { color: #333; font-size: 10px; }
+      .btd-unit        { text-align: center; }
+      .btd-qty         { text-align: center; font-weight: 600; }
+      .btd-price       { text-align: left; min-height: 24px; }
+      .btd-total       { text-align: left; min-height: 24px; }
+
+      .btd-currency {
+        color: #888;
+        font-size: 9px;
+        font-weight: normal;
+        margin-right: 2px;
+      }
+
+      /* Linha de Categoria */
+      .blank-category-row td {
+        background: #e9ecef !important;
+        font-weight: 700;
+        font-size: 10px;
+        padding: 5px 7px !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      /* Linha de Total Geral */
+      .blank-total-row td {
+        background: #f5f5f5 !important;
+        font-weight: 800;
+        font-size: 11px;
+        border-top: 2px solid #000 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      .blank-total-label {
+        text-align: right !important;
+        padding-right: 12px !important;
+      }
+
+      .blank-total-value {
+        font-size: 11px;
+      }
+
+      .blank-notes-box {
+        margin-top: 14px;
+        border: 1px dashed #666;
+        border-radius: 4px;
+        padding: 8px 10px;
+        font-size: 10px;
+        page-break-inside: avoid;
+        break-inside: avoid;
+      }
+
+      .blank-notes-title {
+        font-weight: 700;
+        margin-bottom: 8px;
+      }
+
+      .blank-notes-line {
+        border-bottom: 1px dotted #aaa;
+        height: 14px;
+        margin-bottom: 6px;
       }
     }
 
@@ -1187,15 +1314,15 @@
           <button class="print-dropdown-item" onclick="printFilled()">
             <span class="pdi-icon">📄</span>
             <span class="pdi-text">
-              <strong>Com dados preenchidos</strong>
-              <span>Imprime todos os valores já digitados</span>
+              <strong>Orçamento Completo</strong>
+              <span>Imprime todos os fornecedores e valores preenchidos</span>
             </span>
           </button>
           <button class="print-dropdown-item" onclick="printBlank()">
-            <span class="pdi-icon">📋</span>
+            <span class="pdi-icon">📝</span>
             <span class="pdi-text">
-              <strong>Formulário para caneta</strong>
-              <span>Lacunas em branco para preencher à mão</span>
+              <strong>Formulário para Preencher</strong>
+              <span>Tabela básica limpa para cotação manual a caneta</span>
             </span>
           </button>
         </div>
@@ -1260,6 +1387,9 @@
   <button class="btn btn-ghost" onclick="collapseAll()">📁 <span>Recolher</span></button>
   <div class="toolbar-sep"></div>
   <button class="btn btn-ghost" onclick="exportCSV()">📊 <span>Exportar CSV</span></button>
+  <button class="btn btn-ghost" onclick="printBlank()" title="Imprimir formulário simples para preencher preços à mão">
+    📝 <span>Formulário para Preencher</span>
+  </button>
   <div class="toolbar-sep"></div>
   <button class="btn btn-compare" onclick="goToComparativo()">🛍️ <span>Lista de Compras</span></button>
 </div>
@@ -1280,6 +1410,11 @@
     </tfoot>
   </table>
 </div>
+
+<!-- ============================================================
+     PRINT BLANK FORM CONTAINER (rendered on print)
+============================================================ -->
+<div id="print-blank-container"></div>
 
 <!-- ============================================================
      ADD ITEM MODAL
@@ -2217,44 +2352,122 @@ document.addEventListener('click', function(e) {
   }
 });
 
+function renderBlankPrintForm() {
+  const container = document.getElementById('print-blank-container');
+  if (!container) return;
+
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+  // Agrupa itens ativos por categoria (desconsidera categorias ocultas pelo botão de olho)
+  const cats = {};
+  state.items.forEach(item => {
+    if (state.hiddenCats && state.hiddenCats[item.cat]) return;
+    if (!cats[item.cat]) cats[item.cat] = [];
+    cats[item.cat].push(item);
+  });
+
+  let html = `
+    <div class="blank-print-sheet">
+      <div class="blank-sheet-header">
+        <div class="blank-title-box">
+          <h2>🏗️ ORÇAMENTO DE OBRA — FORMULÁRIO DE COTAÇÃO</h2>
+          <div class="blank-subtitle">Relação de materiais e insumos para cotação e preenchimento manual de preços</div>
+        </div>
+        <div class="blank-meta-grid">
+          <div class="blank-meta-field"><strong>Fornecedor / Loja:</strong> ________________________________________________</div>
+          <div class="blank-meta-field"><strong>Data:</strong> ${dateStr}</div>
+          <div class="blank-meta-field"><strong>Vendedor / Contato:</strong> ____________________________________________</div>
+          <div class="blank-meta-field"><strong>Telefone:</strong> _________________________</div>
+          <div class="blank-meta-field"><strong>Condições de Pagamento:</strong> ______________________________________</div>
+          <div class="blank-meta-field"><strong>Validade da Proposta:</strong> ________ dias</div>
+        </div>
+      </div>
+
+      <table class="blank-simple-table">
+        <thead>
+          <tr>
+            <th class="bth-item">Item</th>
+            <th class="bth-desc">Descrição</th>
+            <th class="bth-unit">Unidades</th>
+            <th class="bth-qty">Quantidades</th>
+            <th class="bth-unit-price">Preço Unit.</th>
+            <th class="bth-total-price">Total dos Produtos</th>
+          </tr>
+        </thead>
+        <tbody>
+  `;
+
+  Object.entries(cats).forEach(([cat, items]) => {
+    html += `
+      <tr class="blank-category-row">
+        <td colspan="6">
+          ${escHtml(cat)}
+        </td>
+      </tr>
+    `;
+
+    items.forEach(item => {
+      html += `
+        <tr class="blank-item-row">
+          <td class="btd-item">${escHtml(item.name)}</td>
+          <td class="btd-desc">${escHtml(item.desc || '—')}</td>
+          <td class="btd-unit">${escHtml(item.unit || '—')}</td>
+          <td class="btd-qty">${item.qty}</td>
+          <td class="btd-price"><span class="btd-currency">R$</span></td>
+          <td class="btd-total"><span class="btd-currency">R$</span></td>
+        </tr>
+      `;
+    });
+  });
+
+  html += `
+        </tbody>
+        <tfoot>
+          <tr class="blank-total-row">
+            <td colspan="4" class="blank-total-label">TOTAL GERAL DOS PRODUTOS:</td>
+            <td colspan="2" class="blank-total-value"><span class="btd-currency">R$</span></td>
+          </tr>
+        </tfoot>
+      </table>
+
+      <div class="blank-notes-box">
+        <div class="blank-notes-title">Observações / Prazo de Entrega / Frete:</div>
+        <div class="blank-notes-line"></div>
+        <div class="blank-notes-line"></div>
+      </div>
+    </div>
+  `;
+
+  container.innerHTML = html;
+}
+
 window.printFilled = function() {
   document.getElementById('print-dropdown').classList.remove('open');
-  document.body.classList.remove('print-blank');
-  document.getElementById('print-blank-notice').style.display = 'none';
+  document.body.classList.remove('print-blank-mode');
+  const blankNotice = document.getElementById('print-blank-notice');
+  if (blankNotice) blankNotice.style.display = 'none';
   setPrintDate();
   setTimeout(() => window.print(), 80);
 };
 
 window.printBlank = function() {
-  document.getElementById('print-dropdown').classList.remove('open');
-  setPrintDate();
+  const dd = document.getElementById('print-dropdown');
+  if (dd) dd.classList.remove('open');
 
-  // Snapshot somente os campos de valores
-  const priceInputs   = [...document.querySelectorAll('.price-input')];
-  const totalDisplays = [...document.querySelectorAll('.total-display')];
-  const grandTotals   = [...document.querySelectorAll('.grand-total')];
+  renderBlankPrintForm();
+  document.body.classList.add('print-blank-mode');
 
-  const storedPrices = priceInputs.map(el   => el.value);
-  const storedTotals = totalDisplays.map(el => el.innerHTML);
-  const storedGrand  = grandTotals.map(el   => el.innerHTML);
-
-  // Limpa apenas os valores monétarios
-  priceInputs.forEach(el   => { el.value = ''; });
-  totalDisplays.forEach(el => { el.innerHTML = ''; });
-  grandTotals.forEach(el   => { el.innerHTML = '&nbsp;'; });
-
-  document.body.classList.add('print-blank');
+  const cleanup = () => {
+    document.body.classList.remove('print-blank-mode');
+    window.removeEventListener('afterprint', cleanup);
+  };
+  window.addEventListener('afterprint', cleanup);
 
   setTimeout(() => {
     window.print();
-    // Restaura tudo após o diálogo de impressão abrir
-    setTimeout(() => {
-      priceInputs.forEach((el, i)   => { el.value = storedPrices[i]; });
-      totalDisplays.forEach((el, i) => { el.innerHTML = storedTotals[i]; });
-      grandTotals.forEach((el, i)   => { el.innerHTML = storedGrand[i]; });
-      document.body.classList.remove('print-blank');
-    }, 1200);
-  }, 80);
+    setTimeout(cleanup, 2500);
+  }, 100);
 };
 
 // Legacy fallback
