@@ -446,6 +446,515 @@
     @keyframes toastIn  { from{opacity:0;transform:translateY(20px)} }
     @keyframes toastOut { to  {opacity:0;transform:translateY(20px)} }
 
+    /* ── EXECUTION DASHBOARD (ORÇADO VS REALIZADO) ── */
+    .exec-dashboard {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+    }
+    .exec-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+    .exec-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--text);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+    .exec-progress-text {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .exec-progress-track {
+      width: 100%;
+      height: 10px;
+      background: var(--surface2);
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 16px;
+      border: 1px solid var(--border);
+    }
+    .exec-progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #238636, #3fb950);
+      border-radius: 6px;
+      transition: width 0.4s ease;
+    }
+    .exec-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 12px;
+    }
+    .exec-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--surface2);
+    }
+    .exec-card.previsto { border-left: 4px solid #58a6ff; }
+    .exec-card.pago     { border-left: 4px solid #3fb950; background: rgba(63, 185, 80, 0.06); }
+    .exec-card.falta    { border-left: 4px solid #e3b341; }
+    .ec-icon { font-size: 22px; flex-shrink: 0; }
+    .ec-info { min-width: 0; flex: 1; }
+    .ec-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; }
+    .ec-val { font-size: 18px; font-weight: 800; color: var(--text); margin-top: 2px; }
+    .exec-card.pago .ec-val { color: #3fb950; }
+    .exec-card.falta .ec-val { color: #e3b341; }
+    .ec-sub { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+    .exec-balance-banner {
+      margin-top: 14px;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .exec-balance-banner.economy {
+      background: rgba(63, 185, 80, 0.12);
+      border: 1px solid rgba(63, 185, 80, 0.35);
+      color: #3fb950;
+    }
+    .exec-balance-banner.over {
+      background: rgba(248, 81, 73, 0.12);
+      border: 1px solid rgba(248, 81, 73, 0.35);
+      color: #f85149;
+    }
+
+    /* ── FILTER PILLS ── */
+    .filter-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .fb-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+    .filter-pills {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .filter-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      border-radius: 20px;
+      font-family: var(--font);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--muted);
+      transition: all 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .filter-pill:hover { border-color: var(--accent); color: var(--text); }
+    .filter-pill.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      font-weight: 700;
+    }
+    .filter-pill.active-pending {
+      background: #e3b341;
+      border-color: #e3b341;
+      color: #000;
+      font-weight: 700;
+    }
+    .filter-pill.active-bought {
+      background: #2ea043;
+      border-color: #2ea043;
+      color: #fff;
+      font-weight: 700;
+    }
+
+    /* ── ITEM BUY BUTTON & BOUGHT STATE ── */
+    .buy-action-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      min-height: 40px;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-family: var(--font);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--text);
+      transition: all 0.2s;
+      flex-shrink: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .buy-action-btn:hover {
+      background: var(--border);
+      border-color: #3fb950;
+      color: #fff;
+    }
+    .buy-action-btn.bought {
+      background: #1a4d2e;
+      border-color: #3fb950;
+      color: #3fb950;
+    }
+    .buy-action-btn.bought:hover {
+      background: #238636;
+      color: #fff;
+    }
+
+    .item-card.is-bought {
+      border-left: 4px solid #3fb950 !important;
+      background: linear-gradient(90deg, rgba(63, 185, 80, 0.07), var(--surface) 25%);
+    }
+    .item-paid-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 6px;
+      background: rgba(63, 185, 80, 0.15);
+      color: #3fb950;
+      border: 1px solid rgba(63, 185, 80, 0.3);
+      margin-top: 3px;
+    }
+    .item-paid-diff {
+      font-size: 10px;
+      font-weight: 600;
+      margin-left: 4px;
+    }
+    .item-paid-diff.economy { color: #3fb950; }
+    .item-paid-diff.over    { color: #f85149; }
+
+    /* ── BIG FRIENDLY MODAL (OPÇÃO 2) ── */
+    .f-modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.78);
+      backdrop-filter: blur(4px);
+      z-index: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      animation: fadeIn 0.2s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    .f-modal-card {
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: 18px;
+      width: 100%;
+      max-width: 480px;
+      padding: 24px;
+      box-shadow: 0 12px 48px rgba(0,0,0,0.6);
+      animation: slideUp 0.25s ease;
+      color: var(--text);
+    }
+    @keyframes slideUp { from { transform: translateY(18px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    .f-modal-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      position: relative;
+    }
+    .f-modal-icon {
+      font-size: 28px;
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      flex-shrink: 0;
+    }
+    .f-modal-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text);
+      margin: 0;
+    }
+    .f-modal-sub {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    .f-modal-close {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 16px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .f-modal-close:hover { color: #fff; background: var(--border); }
+
+    .f-modal-item-box {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 20px;
+    }
+    .fm-item-name {
+      font-size: 16px;
+      font-weight: 800;
+      color: #fff;
+    }
+    .fm-item-desc {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .fm-question {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+
+    .fm-btn-budget {
+      width: 100%;
+      min-height: 58px;
+      background: linear-gradient(135deg, #238636, #2ea043);
+      border: 2px solid #3fb950;
+      border-radius: 12px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 18px;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s;
+      box-shadow: 0 4px 16px rgba(46, 160, 67, 0.3);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .fm-btn-budget:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(46, 160, 67, 0.5);
+    }
+    .fmb-icon { font-size: 24px; flex-shrink: 0; }
+    .fmb-text { display: flex; flex-direction: column; }
+    .fmb-text strong { font-size: 16px; font-weight: 800; }
+    .fmb-text span { font-size: 12px; opacity: 0.9; margin-top: 2px; }
+
+    .fm-divider {
+      text-align: center;
+      margin: 18px 0;
+      position: relative;
+    }
+    .fm-divider::before {
+      content: "";
+      position: absolute;
+      top: 50%; left: 0; right: 0;
+      height: 1px;
+      background: var(--border);
+    }
+    .fm-divider span {
+      position: relative;
+      background: var(--surface);
+      padding: 0 12px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+      letter-spacing: 0.5px;
+    }
+
+    .fm-custom-box {
+      background: rgba(227, 179, 65, 0.06);
+      border: 1px solid rgba(227, 179, 65, 0.3);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 16px;
+    }
+    .fm-input-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      color: #e3b341;
+      margin-bottom: 8px;
+    }
+    .fm-input-row {
+      display: flex;
+      gap: 10px;
+    }
+    .fm-input-wrap {
+      flex: 1;
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .fm-currency-prefix {
+      position: absolute;
+      left: 14px;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--muted);
+      pointer-events: none;
+    }
+    .fm-input {
+      width: 100%;
+      height: 48px;
+      padding: 0 14px 0 42px;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      color: #fff;
+      font-family: var(--font);
+      font-size: 18px;
+      font-weight: 800;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .fm-input:focus {
+      border-color: #e3b341;
+    }
+    .fm-btn-custom {
+      height: 48px;
+      padding: 0 18px;
+      background: #e3b341;
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.2s;
+      flex-shrink: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .fm-btn-custom:hover {
+      background: #d29922;
+      transform: translateY(-1px);
+    }
+    .fm-input-hint {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    /* Modal - item já comprado */
+    .fm-already-bought-banner {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(63, 185, 80, 0.12);
+      border: 1px solid rgba(63, 185, 80, 0.35);
+      border-radius: 12px;
+      padding: 12px 16px;
+    }
+    .fabb-icon { font-size: 26px; }
+    .fabb-title { font-size: 14px; font-weight: 800; color: #3fb950; }
+    .fabb-sub { font-size: 12px; color: var(--text); margin-top: 2px; }
+
+    .fm-btn-unbuy {
+      width: 100%;
+      height: 46px;
+      margin-top: 14px;
+      background: rgba(248, 81, 73, 0.1);
+      border: 1px solid rgba(248, 81, 73, 0.3);
+      border-radius: 10px;
+      color: #f85149;
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .fm-btn-unbuy:hover {
+      background: rgba(248, 81, 73, 0.2);
+      border-color: #f85149;
+    }
+
+    .f-modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+    .f-modal-btn-cancel {
+      padding: 8px 18px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--muted);
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .f-modal-btn-cancel:hover { color: #fff; background: var(--border); }
+
+    @media(max-width: 600px) {
+      .item-main {
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 10px 12px;
+      }
+      .item-info {
+        min-width: 100%;
+        margin-bottom: 4px;
+      }
+      .item-desc {
+        white-space: normal;
+      }
+      .buy-action-btn {
+        margin-left: auto;
+      }
+      .f-modal-card {
+        padding: 18px 16px;
+      }
+      .fm-btn-budget {
+        padding: 10px 14px;
+      }
+      .fmb-text strong {
+        font-size: 14px;
+      }
+    }
+
     /* ── PRINT MODES ── */
     #print-store-container, #print-total-container { display: none; }
 
@@ -626,6 +1135,81 @@
 
 <div id="toast-container"></div>
 
+<!-- ============================================================
+     FRIENDLY BUY MODAL (OPÇÃO 2 - JANELA AMIGÁVEL)
+============================================================ -->
+<div id="friendly-buy-modal" class="f-modal-overlay" style="display:none;" onclick="handleModalOverlayClick(event)">
+  <div class="f-modal-card" onclick="event.stopPropagation()">
+    <div class="f-modal-header">
+      <div class="f-modal-icon" id="fm-header-icon">🛍️</div>
+      <div>
+        <h3 class="f-modal-title" id="fm-title">Marcar como Comprado</h3>
+        <div class="f-modal-sub" id="fm-sub">Confirme o valor pago por este item</div>
+      </div>
+      <button class="f-modal-close" onclick="closeBuyModal()" title="Fechar janela">✕</button>
+    </div>
+
+    <!-- Informações do Item -->
+    <div class="f-modal-item-box">
+      <div class="fm-item-name" id="fm-item-name">—</div>
+      <div class="fm-item-desc" id="fm-item-desc">—</div>
+    </div>
+
+    <!-- Se já estiver comprado, mostra banner -->
+    <div id="fm-already-bought-section" style="display:none; margin-bottom:16px;">
+      <div class="fm-already-bought-banner">
+        <div class="fabb-icon">✅</div>
+        <div>
+          <div class="fabb-title">Item já registrado como comprado!</div>
+          <div class="fabb-sub" id="fm-bought-info">—</div>
+        </div>
+      </div>
+      <button class="fm-btn-unbuy" onclick="unbuyItemFromModal()">↩️ Desmarcar compra (voltar para 'Falta Comprar')</button>
+    </div>
+
+    <!-- Pergunta principal -->
+    <div class="fm-question" id="fm-question-text">Quanto você pagou por este item?</div>
+
+    <!-- Botão 1-Clique: Valor Previsto -->
+    <button class="fm-btn-budget" id="fm-btn-budget" onclick="confirmBuyWithBudget()">
+      <div class="fmb-icon">🟢</div>
+      <div class="fmb-text">
+        <strong id="fm-budget-btn-title">Paguei o valor previsto</strong>
+        <span id="fm-budget-btn-sub">Clique aqui para confirmar este valor</span>
+      </div>
+    </button>
+
+    <div class="fm-divider">
+      <span>OU SE PAGOU UM VALOR DIFERENTE</span>
+    </div>
+
+    <!-- Opção de Valor Diferente -->
+    <div class="fm-custom-box">
+      <label class="fm-input-label" for="fm-custom-input" id="fm-input-label">Digite o valor real que você pagou:</label>
+      <div class="fm-input-row">
+        <div class="fm-input-wrap">
+          <span class="fm-currency-prefix">R$</span>
+          <input type="text" id="fm-custom-input" class="fm-input" placeholder="0,00" inputmode="decimal" onkeydown="if(event.key==='Enter') confirmBuyWithCustom()">
+        </div>
+        <button class="fm-btn-custom" onclick="confirmBuyWithCustom()">Confirmar</button>
+      </div>
+      <div class="fm-input-hint" id="fm-input-hint">💡 Digite o preço unitário ou o total pago</div>
+      <div style="display:flex; gap:16px; margin-top:10px;">
+        <label style="font-size:12px; color:var(--text); display:inline-flex; align-items:center; gap:6px; cursor:pointer;">
+          <input type="radio" name="fm-custom-type" value="unit" id="fm-type-unit" checked onchange="updateCustomHint()"> Preço por unidade
+        </label>
+        <label style="font-size:12px; color:var(--text); display:inline-flex; align-items:center; gap:6px; cursor:pointer;">
+          <input type="radio" name="fm-custom-type" value="total" id="fm-type-total" onchange="updateCustomHint()"> Total pago na nota
+        </label>
+      </div>
+    </div>
+
+    <div class="f-modal-footer">
+      <button class="f-modal-btn-cancel" onclick="closeBuyModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
 <script type="module">
 // ── FIREBASE CONFIG ──────────────────────────────────
 const FIREBASE_CONFIG = {
@@ -647,20 +1231,65 @@ const CATEGORY_META = {
   "6. Louças e Instalações": { id:6, emoji:"🚿" },
 };
 
-let state = { suppliers:[], items:[], prices:{} };
+let state = { suppliers:[], items:[], prices:{}, bought:{} };
 let activeSupplierIdx = -1; // -1 = Total Geral (todas as lojas)
+let currentFilter = 'all';  // 'all' | 'pending' | 'bought'
+let currentOrcId = null;
+let modalItemId = null;
 const hiddenCats = new Set(); // categories hidden by the eye toggle
+
+// ── TOAST ────────────────────────────────────────────
+function toast(msg, type = "") {
+  const c = document.getElementById("toast-container");
+  if (!c) return;
+  const el = document.createElement("div");
+  el.className = `toast ${type}`;
+  el.textContent = msg;
+  c.appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
+window.toast = toast;
+
+// ── PERSISTENCE (BOUGHT STATE) ───────────────────────
+async function saveBoughtState() {
+  try {
+    const raw = localStorage.getItem("orcamento-state");
+    let currentData = raw ? JSON.parse(raw) : {};
+    currentData.bought = state.bought;
+    currentData.updatedAt = new Date().toISOString();
+    localStorage.setItem("orcamento-state", JSON.stringify(currentData));
+  } catch(e) {
+    console.error("Erro ao salvar localmente:", e);
+  }
+
+  if (currentOrcId) {
+    try {
+      const { initializeApp, getApps } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
+      const { getDatabase, ref, set }  = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js");
+      const app = getApps().length ? getApps()[0] : initializeApp(FIREBASE_CONFIG);
+      const rtdb = getDatabase(app);
+      setSyncStatus('syncing');
+      await set(ref(rtdb, `orcamentos/${currentOrcId}/bought`), state.bought);
+      setSyncStatus('synced');
+    } catch(e) {
+      console.error("Erro ao sincronizar compra no Firebase:", e);
+      setSyncStatus('error');
+    }
+  }
+}
 
 // ── INIT ─────────────────────────────────────────────
 (async function init() {
   const params = new URLSearchParams(window.location.search);
   const orcId  = params.get('id');
+  currentOrcId = orcId;
   if (orcId) document.getElementById('back-link').href = `index.html?id=${orcId}`;
 
   const load = d => {
     state.suppliers = d.suppliers || [];
     state.items     = d.items     || [];
     state.prices    = d.prices    || {};
+    state.bought    = d.bought    || {};
     if (d.hiddenCats) {
       hiddenCats.clear();
       if (Array.isArray(d.hiddenCats)) {
@@ -917,6 +1546,107 @@ function renderContent(a) {
     }
   }
 
+  // Execution Metrics calculation based on the current view's items:
+  let totalBudgeted = 0;
+  let totalPaid = 0;
+  let totalPending = 0;
+  let totalBudgetedOfBought = 0;
+  let countBought = 0;
+  let countPending = 0;
+
+  items.forEach(row => {
+    const item = row.item;
+    const p = row.price || 0;
+    const lineBudget = row.total || (p * (item.qty || 0));
+    totalBudgeted += lineBudget;
+
+    const b = state.bought[item.id];
+    const isBought = !!(b && b.bought);
+    if (isBought) {
+      countBought++;
+      const paidT = (b.paidTotal !== undefined && b.paidTotal !== null) ? b.paidTotal : ((b.paidPrice || 0) * (item.qty || 0));
+      totalPaid += paidT;
+      totalBudgetedOfBought += lineBudget;
+    } else {
+      countPending++;
+      totalPending += lineBudget;
+    }
+  });
+
+  const totalItemsCount = items.length;
+  const pctBought = totalItemsCount > 0 ? Math.round((countBought / totalItemsCount) * 100) : 0;
+  const diffEconomy = totalBudgetedOfBought - totalPaid;
+  const pctEconomy = totalBudgetedOfBought > 0 ? ((Math.abs(diffEconomy) / totalBudgetedOfBought) * 100).toFixed(1) : 0;
+
+  let balanceHtml = '';
+  if (countBought > 0) {
+    if (diffEconomy > 0.01) {
+      balanceHtml = `
+        <div class="exec-balance-banner positive">
+          🎉 <strong>Economia de ${fmtCurrency(diffEconomy)}</strong> (${pctEconomy}% abaixo do orçamento previsto nos itens comprados)
+        </div>`;
+    } else if (diffEconomy < -0.01) {
+      balanceHtml = `
+        <div class="exec-balance-banner negative">
+          ⚠️ <strong>R$ ${fmtCurrency(Math.abs(diffEconomy))} acima do previsto</strong> (${pctEconomy}% a mais nos itens comprados)
+        </div>`;
+    } else {
+      balanceHtml = `
+        <div class="exec-balance-banner positive">
+          ✅ <strong>Gastos realizados exatamente de acordo com o orçamento previsto!</strong>
+        </div>`;
+    }
+  }
+
+  const execDashboardHtml = `
+    <div class="exec-dashboard">
+      <div class="exec-header">
+        <div class="exec-title">📊 Execução da Obra (${isTotalView ? 'Total Geral' : escHtml(sup)})</div>
+        <div class="exec-progress-text">${countBought} de ${totalItemsCount} itens comprados (${pctBought}%)</div>
+      </div>
+      <div class="exec-progress-track">
+        <div class="exec-progress-bar" style="width: ${pctBought}%"></div>
+      </div>
+
+      <div class="exec-cards-grid">
+        <div class="exec-card previsto">
+          <div class="exec-card-lbl">Previsto no Orçamento</div>
+          <div class="exec-card-val">${fmtCurrency(isTotalView ? mixedTotal : total)}</div>
+          <div class="exec-card-sub">${totalItemsCount} iten${totalItemsCount !== 1 ? 's' : ''} orçado${totalItemsCount !== 1 ? 's' : ''}</div>
+        </div>
+        <div class="exec-card pago">
+          <div class="exec-card-lbl">Total Realizado / Pago</div>
+          <div class="exec-card-val" style="color:var(--green)">${fmtCurrency(totalPaid)}</div>
+          <div class="exec-card-sub">${countBought} iten${countBought !== 1 ? 's' : ''} comprado${countBought !== 1 ? 's' : ''}</div>
+        </div>
+        <div class="exec-card falta">
+          <div class="exec-card-lbl">Falta Comprar (Estimado)</div>
+          <div class="exec-card-val" style="color:#e3b341">${fmtCurrency(totalPending)}</div>
+          <div class="exec-card-sub">${countPending} iten${countPending !== 1 ? 's' : ''} pendente${countPending !== 1 ? 's' : ''}</div>
+        </div>
+      </div>
+
+      ${balanceHtml}
+    </div>
+  `;
+
+  const filterBarHtml = `
+    <div class="filter-bar">
+      <span class="filter-label">Visualizar:</span>
+      <div class="filter-pills">
+        <button class="filter-pill ${currentFilter === 'all' ? 'active' : ''}" onclick="setFilter('all')">
+          📦 Todos (${totalItemsCount})
+        </button>
+        <button class="filter-pill ${currentFilter === 'pending' ? 'active-pending' : ''}" onclick="setFilter('pending')">
+          ⏳ Falta Comprar (${countPending})
+        </button>
+        <button class="filter-pill ${currentFilter === 'bought' ? 'active-bought' : ''}" onclick="setFilter('bought')">
+          ✅ Já Comprados (${countBought})
+        </button>
+      </div>
+    </div>
+  `;
+
   let html = ``;
 
   // ── 1. HEADER (DIFERENCIADO POR ABA) ───────────────
@@ -948,7 +1678,11 @@ function renderContent(a) {
     </div>`;
   }
 
-  // ── 2. GLOBAL COMPARISON CARD ──────────────────────
+  // ── 2. EXECUTION DASHBOARD & FILTER BAR ───────────
+  html += execDashboardHtml;
+  html += filterBarHtml;
+
+  // ── 3. GLOBAL COMPARISON CARD ──────────────────────
   html += `
   <div class="global-card">
     <div class="gc-header" onclick="toggleGlobal()">
@@ -988,7 +1722,7 @@ function renderContent(a) {
     return;
   }
 
-  // ── 3. ITEMS BY CATEGORY ───────────────────────────
+  // ── 4. ITEMS BY CATEGORY ───────────────────────────
   const byCat = {};
   items.forEach(row => {
     const cat = row.item.cat || 'Outros';
@@ -996,10 +1730,22 @@ function renderContent(a) {
     byCat[cat].push(row);
   });
 
+  let visibleItemsCount = 0;
+
   Object.entries(byCat).forEach(([cat, rows]) => {
+    const filteredRows = rows.filter(r => {
+      const isBought = !!(state.bought[r.item.id] && state.bought[r.item.id].bought);
+      if (currentFilter === 'pending') return !isBought;
+      if (currentFilter === 'bought') return isBought;
+      return true;
+    });
+
+    if (filteredRows.length === 0) return;
+
+    visibleItemsCount += filteredRows.length;
     const meta       = CATEGORY_META[cat] || { id:7, emoji:'📦' };
     const catCls     = `cat-${meta.id}`;
-    const catRowTotal = rows.reduce((a,r) => a+r.total, 0);
+    const catRowTotal = filteredRows.reduce((a,r) => a+r.total, 0);
     const catKey     = cat.replace(/[^a-z0-9]/gi,'_');
     const isHidden   = hiddenCats.has(cat);
 
@@ -1016,7 +1762,7 @@ function renderContent(a) {
       <div class="cat-items-body${isHidden ? ' hidden' : ''}" id="cat-items-${catKey}">`;
 
     // Items
-    rows.forEach(({ item, price, total: lineTotal }) => {
+    filteredRows.forEach(({ item, price, total: lineTotal }) => {
       const d     = itemData[item.id];
       const compCells = state.suppliers.map((sName, sIdx) => {
         const p       = d.prices[sIdx];
@@ -1053,18 +1799,48 @@ function renderContent(a) {
         }
       }
 
-      html += `<div class="item-card">
+      const bRec = state.bought[item.id];
+      const isBought = !!(bRec && bRec.bought);
+      let paidBadgeHtml = '';
+
+      if (isBought) {
+        const paidUnit = bRec.paidPrice !== undefined ? bRec.paidPrice : price;
+        const paidTot = bRec.paidTotal !== undefined ? bRec.paidTotal : (paidUnit * (item.qty || 1));
+        const diffUnit = (price > 0) ? (paidUnit - price) : 0;
+        let diffStr = '';
+        if (Math.abs(diffUnit) > 0.009) {
+          if (diffUnit < 0) {
+            diffStr = `<span class="item-paid-diff economy">🎉 Economia de ${fmtCurrency(Math.abs(diffUnit * (item.qty||1)))}</span>`;
+          } else {
+            diffStr = `<span class="item-paid-diff over">⚠️ +${fmtCurrency(diffUnit * (item.qty||1))} acima</span>`;
+          }
+        }
+        paidBadgeHtml = `
+          <div class="item-paid-badge">
+            <span>✅ PAGO: ${fmtCurrency(paidTot)} (${fmtCurrencyRaw(paidUnit)}/${escHtml(item.unit)})</span>
+            ${diffStr}
+          </div>
+        `;
+      }
+
+      html += `<div class="item-card ${isBought ? 'is-bought' : ''}">
         <div class="item-main" onclick="toggleCompare('${item.id}')">
           <div class="item-info">
             <div class="item-name">${escHtml(item.name)}</div>
             <div class="item-desc">${escHtml(item.desc)}</div>
             ${bestStoreLabel}
+            ${paidBadgeHtml}
           </div>
           <div class="item-qty-unit"><div class="qty-badge">${item.qty}</div><span>${escHtml(item.unit)}</span></div>
           <div class="item-price-block">
             <div class="unit-price">${price > 0 ? fmtCurrencyRaw(price) : '—'} / ${escHtml(item.unit)}</div>
             <div class="line-total">${lineTotal > 0 ? fmtCurrency(lineTotal) : '—'}</div>
           </div>
+          <button class="buy-action-btn ${isBought ? 'bought' : ''}" 
+                  onclick="event.stopPropagation(); openBuyModal('${item.id}', event)" 
+                  title="${isBought ? 'Clique para alterar valor ou desmarcar compra' : 'Clique para marcar como comprado'}">
+            ${isBought ? '✅ Comprado' : '⚪ Comprar'}
+          </button>
           <div class="expand-btn" id="expand-${item.id}">▼</div>
         </div>
         <div class="compare-panel" id="panel-${item.id}">
@@ -1079,7 +1855,7 @@ function renderContent(a) {
     const validCatTotals = catSupTotals.filter(t => t !== null);
     const minCatTotal    = validCatTotals.length ? Math.min(...validCatTotals) : null;
 
-    if (minCatTotal !== null) {
+    if (minCatTotal !== null && currentFilter === 'all') {
       const subCells = state.suppliers.map((sName, sIdx) => {
         const t       = catSupTotals[sIdx];
         const isCheap = t === minCatTotal;
@@ -1113,14 +1889,33 @@ function renderContent(a) {
       </div>`;
     }
 
-    // Close cat-items-body, then render subtotal outside it
     html += `</div>`; // close cat-items-body
-
     html += `</div>`; // end cat-section
   });
 
-  // Items with no price
-  if (noPrice.length > 0) {
+  // Empty state if current filter matched 0 items
+  if (visibleItemsCount === 0) {
+    if (currentFilter === 'pending') {
+      html += `
+        <div class="empty-state" style="padding:40px 20px">
+          <div class="es-icon">🎉</div>
+          <h3>Todos os itens já foram comprados!</h3>
+          <p>Nenhum item pendente de compra nesta visualização.</p>
+          <button class="filter-pill active" style="margin-top:14px" onclick="setFilter('all')">Ver todos os itens</button>
+        </div>`;
+    } else if (currentFilter === 'bought') {
+      html += `
+        <div class="empty-state" style="padding:40px 20px">
+          <div class="es-icon">🛒</div>
+          <h3>Nenhum item marcado como comprado ainda</h3>
+          <p>Toque no botão <strong>"⚪ Comprar"</strong> nos itens para registrar as compras realizadas.</p>
+          <button class="filter-pill active" style="margin-top:14px" onclick="setFilter('all')">Ver todos os itens</button>
+        </div>`;
+    }
+  }
+
+  // Items with no price (active only, only in 'all' or 'pending' filter)
+  if (noPrice.length > 0 && currentFilter !== 'bought') {
     html += `<div class="cat-section" style="margin-top:20px">
       <div class="cat-label cat-7">⚠️ Itens sem cotação (${noPrice.length})</div>
       ${noPrice.map(item => `
@@ -1193,6 +1988,180 @@ window.collapseAllCompare = function() {
   document.querySelectorAll('.compare-panel').forEach(p => p.classList.remove('open'));
   document.querySelectorAll('.expand-btn').forEach(b => { b.classList.remove('open'); b.textContent='▼'; });
 };
+
+// ── EXECUTION & MODAL HANDLERS (OPÇÃO 2) ─────────────
+window.setFilter = function(filter) {
+  currentFilter = filter;
+  renderAll();
+};
+
+window.openBuyModal = function(itemId, event) {
+  if (event) event.stopPropagation();
+  modalItemId = itemId;
+  const item = state.items.find(i => i.id === itemId);
+  if (!item) return;
+
+  const a = analyze();
+  const d = a.itemData[itemId];
+  const budgetPrice = (activeSupplierIdx === -1 ? d.minPrice : (d.prices[activeSupplierIdx] || d.minPrice)) || 0;
+  const budgetTotal = budgetPrice * (item.qty || 0);
+
+  const modal = document.getElementById('friendly-buy-modal');
+  const itemNameEl = document.getElementById('fm-item-name');
+  const itemDescEl = document.getElementById('fm-item-desc');
+  const alreadyBoughtSec = document.getElementById('fm-already-bought-section');
+  const boughtInfoEl = document.getElementById('fm-bought-info');
+  const modalTitle = document.getElementById('fm-title');
+  const modalSub = document.getElementById('fm-sub');
+  const questionEl = document.getElementById('fm-question-text');
+  const budgetBtnTitle = document.getElementById('fm-budget-btn-title');
+  const budgetBtnSub = document.getElementById('fm-budget-btn-sub');
+  const customInput = document.getElementById('fm-custom-input');
+
+  itemNameEl.textContent = item.name;
+  itemDescEl.textContent = `${item.qty} ${item.unit} · Categoria: ${item.cat}${item.desc ? ' · ' + item.desc : ''}`;
+
+  const bRec = state.bought[itemId];
+  const isBought = !!(bRec && bRec.bought);
+
+  if (isBought) {
+    alreadyBoughtSec.style.display = 'block';
+    const paidT = (bRec.paidTotal !== undefined) ? bRec.paidTotal : ((bRec.paidPrice || 0) * (item.qty || 1));
+    boughtInfoEl.textContent = `Registrado: ${fmtCurrency(paidT)} (${fmtCurrencyRaw(bRec.paidPrice)}/${item.unit})`;
+    modalTitle.textContent = 'Editar Compra do Item';
+    modalSub.textContent = 'Altere o valor pago ou desmarque este item';
+    questionEl.textContent = 'Deseja alterar o valor pago por este item?';
+    budgetBtnTitle.textContent = `Definir como valor previsto (${fmtCurrencyRaw(budgetPrice)}/${item.unit})`;
+    budgetBtnSub.textContent = `Total previsto: ${fmtCurrency(budgetTotal)} · Toque para redefinir`;
+    customInput.value = (bRec.paidPrice || budgetPrice).toFixed(2).replace('.', ',');
+  } else {
+    alreadyBoughtSec.style.display = 'none';
+    modalTitle.textContent = 'Marcar como Comprado';
+    modalSub.textContent = 'Confirme o valor pago por este item';
+    questionEl.textContent = 'Quanto você pagou por este item?';
+    budgetBtnTitle.textContent = `Paguei o valor previsto (${fmtCurrencyRaw(budgetPrice)}/${item.unit})`;
+    budgetBtnSub.textContent = `Valor total: ${fmtCurrency(budgetTotal)} · Toque aqui para confirmar com 1 clique`;
+    customInput.value = budgetPrice > 0 ? budgetPrice.toFixed(2).replace('.', ',') : '';
+  }
+
+  document.getElementById('fm-type-unit').checked = true;
+  window.updateCustomHint();
+
+  modal.style.display = 'flex';
+};
+
+window.closeBuyModal = function() {
+  const modal = document.getElementById('friendly-buy-modal');
+  if (modal) modal.style.display = 'none';
+  modalItemId = null;
+};
+
+window.handleModalOverlayClick = function(event) {
+  if (event.target === document.getElementById('friendly-buy-modal')) {
+    window.closeBuyModal();
+  }
+};
+
+window.updateCustomHint = function() {
+  if (!modalItemId) return;
+  const item = state.items.find(i => i.id === modalItemId);
+  if (!item) return;
+  const isTotal = document.getElementById('fm-type-total').checked;
+  const hintEl = document.getElementById('fm-input-hint');
+  const labelEl = document.getElementById('fm-input-label');
+  if (isTotal) {
+    labelEl.textContent = `Digite o valor TOTAL pago na compra dos ${item.qty} ${item.unit}:`;
+    hintEl.textContent = `💡 O sistema calculará o preço unitário dividindo pelos ${item.qty} ${item.unit}.`;
+  } else {
+    labelEl.textContent = `Digite o preço pago por cada ${item.unit}:`;
+    hintEl.textContent = `💡 O sistema multiplicará pela quantidade (${item.qty} ${item.unit}) para calcular o total.`;
+  }
+};
+
+window.confirmBuyWithBudget = async function() {
+  if (!modalItemId) return;
+  const item = state.items.find(i => i.id === modalItemId);
+  if (!item) return;
+
+  const a = analyze();
+  const d = a.itemData[modalItemId];
+  const budgetPrice = (activeSupplierIdx === -1 ? d.minPrice : (d.prices[activeSupplierIdx] || d.minPrice)) || 0;
+  const budgetTotal = budgetPrice * (item.qty || 0);
+
+  state.bought[modalItemId] = {
+    bought: true,
+    paidPrice: budgetPrice,
+    paidTotal: budgetTotal,
+    customPrice: false,
+    updatedAt: new Date().toISOString()
+  };
+
+  await saveBoughtState();
+  window.closeBuyModal();
+  renderAll();
+  toast(`✅ "${item.name}" marcado como comprado!`, 'success');
+};
+
+window.confirmBuyWithCustom = async function() {
+  if (!modalItemId) return;
+  const item = state.items.find(i => i.id === modalItemId);
+  if (!item) return;
+
+  const inputEl = document.getElementById('fm-custom-input');
+  const raw = inputEl.value.trim().replace(/\./g, '').replace(',', '.');
+  const val = parseFloat(raw);
+
+  if (isNaN(val) || val < 0) {
+    toast('⚠️ Digite um valor numérico válido (ex: 35,00)', 'error');
+    inputEl.focus();
+    return;
+  }
+
+  const isTotal = document.getElementById('fm-type-total').checked;
+  let paidPrice = 0;
+  let paidTotal = 0;
+
+  if (isTotal) {
+    paidTotal = val;
+    paidPrice = (item.qty > 0) ? (val / item.qty) : val;
+  } else {
+    paidPrice = val;
+    paidTotal = val * (item.qty || 0);
+  }
+
+  state.bought[modalItemId] = {
+    bought: true,
+    paidPrice: paidPrice,
+    paidTotal: paidTotal,
+    customPrice: true,
+    updatedAt: new Date().toISOString()
+  };
+
+  await saveBoughtState();
+  window.closeBuyModal();
+  renderAll();
+  toast(`✅ Valor de "${item.name}" salvo com sucesso!`, 'success');
+};
+
+window.unbuyItemFromModal = async function() {
+  if (!modalItemId) return;
+  const item = state.items.find(i => i.id === modalItemId);
+  const name = item ? item.name : 'Item';
+
+  if (state.bought[modalItemId]) {
+    delete state.bought[modalItemId];
+    await saveBoughtState();
+    window.closeBuyModal();
+    renderAll();
+    toast(`↩️ "${name}" desmarcado da lista!`);
+  }
+};
+
+window.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    window.closeBuyModal();
+  }
+});
 
 function showError(msg) {
   document.getElementById('content').innerHTML =
@@ -1271,9 +2240,11 @@ window.printStoreList = function() {
         </tr>
       `;
       catRows.forEach(({ item, price, total: lineTotal }) => {
+        const isB = !!(state.bought[item.id] && state.bought[item.id].bought);
+        const statusBadge = isB ? `<span style="font-size:9px;color:#1a6b2e;font-weight:700;margin-left:4px;">[✅ Comprado]</span>` : `<span style="font-size:9px;color:#777;margin-left:4px;">[⬜ A Comprar]</span>`;
         html += `
           <tr>
-            <td><strong>${escHtml(item.name)}</strong></td>
+            <td><strong>${escHtml(item.name)}</strong> ${statusBadge}</td>
             <td>${escHtml(item.desc || '—')}</td>
             <td style="text-align:center;">${escHtml(item.unit || '—')}</td>
             <td style="text-align:center; font-weight:600;">${item.qty}</td>
@@ -1396,9 +2367,12 @@ window.printTotalList = function() {
       const lineTotal = hasPrice ? d.minPrice * (item.qty || 0) : 0;
       const totalStr = hasPrice ? fmtCurrency(lineTotal) : '—';
 
+      const isB = !!(state.bought[item.id] && state.bought[item.id].bought);
+      const statusBadge = isB ? `<span style="font-size:9px;color:#1a6b2e;font-weight:700;margin-left:4px;">[✅ Comprado]</span>` : `<span style="font-size:9px;color:#777;margin-left:4px;">[⬜ A Comprar]</span>`;
+
       html += `
         <tr>
-          <td><strong>${escHtml(item.name)}</strong></td>
+          <td><strong>${escHtml(item.name)}</strong> ${statusBadge}</td>
           <td>${escHtml(item.desc || '—')}</td>
           <td style="text-align:center;">${escHtml(item.unit || '—')}</td>
           <td style="text-align:center; font-weight:600;">${item.qty}</td>
