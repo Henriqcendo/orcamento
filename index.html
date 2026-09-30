@@ -427,6 +427,7 @@
       position: sticky;
       top: 0;
       white-space: nowrap;
+      user-select: none;
     }
 
     thead.col-headers th.price-col {
@@ -436,6 +437,129 @@
 
     thead.col-headers th.supplier-group {
       text-align: center;
+    }
+
+    /* ── HEADER CONTENT & PIN BUTTON ── */
+    .th-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px;
+      min-height: 22px;
+    }
+    .btn-pin-header {
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      padding: 2px 4px;
+      line-height: 1;
+      opacity: 0.5;
+      transition: all 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-pin-header:hover {
+      opacity: 1;
+      background: rgba(255, 255, 255, 0.12);
+      transform: scale(1.15);
+    }
+    .btn-pin-header.active {
+      opacity: 1;
+      background: rgba(88, 166, 255, 0.25);
+      border-color: var(--accent);
+      color: #fff;
+      box-shadow: 0 0 6px rgba(88, 166, 255, 0.5);
+    }
+
+    /* ── COLUMN RESIZER (DRAG & RESIZE) ── */
+    .col-resizer {
+      position: absolute;
+      top: 0;
+      right: -3px;
+      width: 14px;
+      height: 100%;
+      cursor: col-resize;
+      user-select: none;
+      z-index: 35;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      touch-action: none;
+    }
+    .col-resizer::after {
+      content: "";
+      width: 3px;
+      height: 16px;
+      background: rgba(255, 255, 255, 0.22);
+      border-radius: 2px;
+      transition: all 0.15s ease;
+    }
+    .col-resizer:hover::after,
+    .col-resizer.active::after {
+      background: var(--accent);
+      height: 100%;
+      width: 4px;
+      box-shadow: 0 0 8px var(--accent);
+    }
+    body.is-col-resizing {
+      cursor: col-resize !important;
+      user-select: none !important;
+    }
+    body.is-col-resizing * {
+      cursor: col-resize !important;
+      user-select: none !important;
+    }
+
+    /* ── STICKY ITEM COLUMN (WEBMOBILE) ── */
+    .table-wrapper.sticky-item-col table {
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+    .table-wrapper.sticky-item-col td,
+    .table-wrapper.sticky-item-col th {
+      border-bottom: 1px solid var(--border);
+    }
+    .table-wrapper.sticky-item-col th.th-item,
+    .table-wrapper.sticky-item-col td.td-item {
+      position: sticky !important;
+      left: 0 !important;
+      z-index: 10 !important;
+      background: var(--surface) !important;
+      box-shadow: 4px 0 10px rgba(0, 0, 0, 0.45);
+      border-right: 2px solid var(--accent) !important;
+    }
+    .table-wrapper.sticky-item-col thead.col-headers th.th-item {
+      z-index: 30 !important;
+      background: var(--surface) !important;
+    }
+    .table-wrapper.sticky-item-col tbody.items-body tr.item-row td.td-item {
+      background: var(--bg) !important;
+    }
+    .table-wrapper.sticky-item-col tbody.items-body tr.item-row:hover td.td-item {
+      background: var(--surface2) !important;
+    }
+    .table-wrapper.sticky-item-col .cat-header-content {
+      position: sticky;
+      left: 14px;
+      display: inline-flex;
+      align-items: center;
+      max-width: 100%;
+    }
+    .table-wrapper.sticky-item-col tfoot.totals-foot td.td-total-label {
+      position: sticky;
+      left: 0;
+      z-index: 15;
+      background: var(--surface) !important;
+      box-shadow: 4px 0 10px rgba(0, 0, 0, 0.45);
+      border-right: 2px solid var(--accent);
+    }
+
+    .btn-sticky-active {
+      background: rgba(88, 166, 255, 0.18) !important;
+      border-color: var(--accent) !important;
+      color: var(--accent) !important;
+      font-weight: 700 !important;
     }
 
     /* Data rows */
@@ -452,10 +576,15 @@
       vertical-align: middle;
     }
 
-    .td-item { color: var(--text); font-weight: 600; min-width: 110px; }
-    .td-desc { color: var(--text-muted); font-size: 12px; min-width: 160px; max-width: 220px; }
+    .td-item { color: var(--text); font-weight: 600; min-width: 90px; }
+    .td-desc { color: var(--text-muted); font-size: 12px; min-width: 120px; }
     .td-unit { color: var(--text-muted); font-size: 12px; text-align: center; white-space: nowrap; }
     .td-qty  { color: var(--text); font-weight: 600; text-align: center; }
+
+    .td-item input, .td-desc input {
+      min-width: 0 !important;
+      width: 100% !important;
+    }
 
     /* Price cells */
     .price-group {
@@ -1391,13 +1520,17 @@
     📝 <span>Formulário para Preencher</span>
   </button>
   <div class="toolbar-sep"></div>
+  <button class="btn btn-ghost" id="btn-sticky-col" onclick="toggleStickyCol()" title="Fixar coluna com os nomes dos itens ao rolar a tela horizontalmente (ideal no celular)">
+    📌 <span id="btn-sticky-text">Fixar Coluna</span>
+  </button>
+  <div class="toolbar-sep"></div>
   <button class="btn btn-compare" onclick="goToComparativo()">🛍️ <span>Lista de Compras</span></button>
 </div>
 
 <!-- ============================================================
      MAIN TABLE
 ============================================================ -->
-<div class="table-wrapper">
+<div class="table-wrapper" id="table-wrapper">
   <table id="budget-table">
     <thead class="col-headers" id="col-headers">
       <!-- Populated by JS -->
@@ -1510,6 +1643,33 @@ const CATEGORY_META = {
   "6. Louças e Instalações":  { id: 6, emoji: "🚿", short: "Louças/Inst." },
 };
 
+const DEFAULT_COL_WIDTHS = {
+  item: 140,
+  desc: 220,
+  unit: 65,
+  qty: 60,
+  price: 95,
+  total: 105,
+};
+
+function loadColWidths() {
+  try {
+    const raw = localStorage.getItem("orcamento-col-widths");
+    if (raw) return Object.assign({}, DEFAULT_COL_WIDTHS, JSON.parse(raw));
+  } catch(e) {}
+  return Object.assign({}, DEFAULT_COL_WIDTHS);
+}
+
+function loadStickyCol() {
+  try {
+    const saved = localStorage.getItem("orcamento-sticky-col");
+    if (saved !== null) return saved === "true";
+  } catch(e) {}
+  return window.innerWidth <= 768;
+}
+
+let isStickyCol = loadStickyCol();
+
 let state = {
   suppliers: [...DEFAULT_SUPPLIERS],
   items: [],
@@ -1518,6 +1678,7 @@ let state = {
   hiddenCats: {},      // key: category, value: bool (excluded from totals + collapsed)
   hiddenSuppliers: {}, // key: supplier index, value: bool (minimized)
   bought: {},          // key: itemId, value: { bought: true, paidPrice, paidTotal, customPrice, updatedAt }
+  colWidths: loadColWidths(),
 };
 
 // ============================================================
@@ -1726,7 +1887,132 @@ function renderAll() {
   renderTotals();
   renderSummaryBar();
   populateCategorySelect();
+  updateColWidthsStylesheet();
+  syncStickyColUI();
 }
+
+function syncStickyColUI() {
+  const wrapper = document.getElementById("table-wrapper");
+  if (wrapper) wrapper.classList.toggle("sticky-item-col", isStickyCol);
+  const btn = document.getElementById("btn-sticky-col");
+  if (btn) {
+    btn.classList.toggle("btn-sticky-active", isStickyCol);
+    const txt = document.getElementById("btn-sticky-text");
+    if (txt) txt.textContent = isStickyCol ? "Coluna Fixa: Ligada" : "Fixar Coluna";
+  }
+  document.querySelectorAll(".btn-pin-header").forEach(p => {
+    p.classList.toggle("active", isStickyCol);
+    p.title = isStickyCol ? "Desafixar coluna dos itens" : "Fixar coluna dos itens ao rolar no celular";
+  });
+}
+
+function updateColWidthsStylesheet() {
+  let styleEl = document.getElementById("dynamic-col-widths");
+  if (!styleEl) {
+    styleEl = document.createElement("style");
+    styleEl.id = "dynamic-col-widths";
+    document.head.appendChild(styleEl);
+  }
+  const w = state.colWidths || DEFAULT_COL_WIDTHS;
+  const itemW = w.item || DEFAULT_COL_WIDTHS.item;
+  const descW = w.desc || DEFAULT_COL_WIDTHS.desc;
+  const unitW = w.unit || DEFAULT_COL_WIDTHS.unit;
+  const qtyW  = w.qty  || DEFAULT_COL_WIDTHS.qty;
+
+  let css = `
+    .th-item, .td-item { width: ${itemW}px !important; min-width: ${itemW}px !important; max-width: ${itemW}px !important; }
+    .th-desc, .td-desc { width: ${descW}px !important; min-width: ${descW}px !important; }
+    .th-unit, .td-unit { width: ${unitW}px !important; min-width: ${unitW}px !important; }
+    .th-qty, .td-qty   { width: ${qtyW}px !important; min-width: ${qtyW}px !important; }
+  `;
+  (state.suppliers || []).forEach((_, si) => {
+    const pW = w[`sup-${si}-price`] || w.price || DEFAULT_COL_WIDTHS.price;
+    const tW = w[`sup-${si}-total`] || w.total || DEFAULT_COL_WIDTHS.total;
+    css += `
+      .col-sup-${si}-price { width: ${pW}px !important; min-width: ${pW}px !important; }
+      .col-sup-${si}-total { width: ${tW}px !important; min-width: ${tW}px !important; }
+      .col-sup-${si}-group { width: ${pW + tW}px !important; min-width: ${pW + tW}px !important; }
+    `;
+  });
+  styleEl.textContent = css;
+}
+
+window.toggleStickyCol = function() {
+  isStickyCol = !isStickyCol;
+  syncStickyColUI();
+  try {
+    localStorage.setItem("orcamento-sticky-col", isStickyCol ? "true" : "false");
+  } catch(e) {}
+
+  if (isStickyCol) {
+    toast("📌 Coluna de itens fixada para rolagem no celular!", "success");
+  } else {
+    toast("📌 Coluna de itens desafixada!");
+  }
+};
+
+window.initColResize = function(e, colKey) {
+  e.preventDefault();
+  e.stopPropagation();
+
+  const isTouch = e.type === 'touchstart';
+  const startX = isTouch ? e.touches[0].pageX : e.pageX;
+  const th = e.target.closest('th');
+  if (!th) return;
+
+  const startWidth = th.getBoundingClientRect().width;
+  const minWidth = (colKey === 'unit' || colKey === 'qty') ? 45 : 75;
+
+  document.body.classList.add('is-col-resizing');
+  e.target.classList.add('active');
+
+  function onMove(me) {
+    const curX = isTouch ? me.touches[0].pageX : me.pageX;
+    const deltaX = curX - startX;
+    const newWidth = Math.max(minWidth, Math.round(startWidth + deltaX));
+
+    if (colKey.startsWith('sup-') && !colKey.includes('-price') && !colKey.includes('-total')) {
+      const si = colKey.replace('sup-', '');
+      const half = Math.round(newWidth / 2);
+      state.colWidths[`sup-${si}-price`] = Math.max(70, half - 5);
+      state.colWidths[`sup-${si}-total`] = Math.max(75, half + 5);
+    } else {
+      state.colWidths[colKey] = newWidth;
+    }
+
+    updateColWidthsStylesheet();
+  }
+
+  function onEnd() {
+    document.body.classList.remove('is-col-resizing');
+    if (e.target) e.target.classList.remove('active');
+
+    window.removeEventListener(isTouch ? 'touchmove' : 'mousemove', onMove);
+    window.removeEventListener(isTouch ? 'touchend' : 'mouseup', onEnd);
+
+    try {
+      localStorage.setItem("orcamento-col-widths", JSON.stringify(state.colWidths));
+    } catch(err) {}
+  }
+
+  window.addEventListener(isTouch ? 'touchmove' : 'mousemove', onMove, { passive: false });
+  window.addEventListener(isTouch ? 'touchend' : 'mouseup', onEnd);
+};
+
+window.resetColWidth = function(colKey) {
+  if (colKey.startsWith('sup-') && !colKey.includes('-price') && !colKey.includes('-total')) {
+    const si = colKey.replace('sup-', '');
+    delete state.colWidths[`sup-${si}-price`];
+    delete state.colWidths[`sup-${si}-total`];
+  } else {
+    delete state.colWidths[colKey];
+  }
+  updateColWidthsStylesheet();
+  try {
+    localStorage.setItem("orcamento-col-widths", JSON.stringify(state.colWidths));
+  } catch(e) {}
+  toast("📐 Largura da coluna redefinida!", "success");
+};
 
 // Helper: total column count for colspan
 function totalColCount() {
@@ -1737,62 +2023,87 @@ function totalColCount() {
 function renderColHeaders() {
   const thead = document.getElementById("col-headers");
 
-  // Row 1: supplier group headers
+  // Row 1: base headers + supplier group headers
   let html = `<tr>
-    <th style="min-width:100px">Item</th>
-    <th style="min-width:160px">Descrição</th>
-    <th style="min-width:60px; text-align:center">Unid.</th>
-    <th style="min-width:55px; text-align:center">Qtd.</th>`;
+    <th rowspan="2" class="th-item" data-col="item">
+      <div class="th-content">
+        <span>Item</span>
+        <button class="btn-pin-header ${isStickyCol ? 'active' : ''}" onclick="toggleStickyCol()" title="${isStickyCol ? 'Desafixar coluna dos itens' : 'Fixar coluna dos itens ao rolar no celular'}">📌</button>
+      </div>
+      <div class="col-resizer" onmousedown="initColResize(event, 'item')" ontouchstart="initColResize(event, 'item')" ondblclick="resetColWidth('item')" title="Arraste para redimensionar (duplo-clique para redefinir)"></div>
+    </th>
+    <th rowspan="2" class="th-desc" data-col="desc">
+      <div class="th-content">
+        <span>Descrição</span>
+      </div>
+      <div class="col-resizer" onmousedown="initColResize(event, 'desc')" ontouchstart="initColResize(event, 'desc')" ondblclick="resetColWidth('desc')" title="Arraste para redimensionar (duplo-clique para redefinir)"></div>
+    </th>
+    <th rowspan="2" class="th-unit" data-col="unit" style="text-align:center">
+      <div class="th-content" style="justify-content:center">
+        <span>Unid.</span>
+      </div>
+      <div class="col-resizer" onmousedown="initColResize(event, 'unit')" ontouchstart="initColResize(event, 'unit')" ondblclick="resetColWidth('unit')" title="Arraste para redimensionar (duplo-clique para redefinir)"></div>
+    </th>
+    <th rowspan="2" class="th-qty" data-col="qty" style="text-align:center">
+      <div class="th-content" style="justify-content:center">
+        <span>Qtd.</span>
+      </div>
+      <div class="col-resizer" onmousedown="initColResize(event, 'qty')" ontouchstart="initColResize(event, 'qty')" ondblclick="resetColWidth('qty')" title="Arraste para redimensionar (duplo-clique para redefinir)"></div>
+    </th>`;
 
   state.suppliers.forEach((sup, si) => {
     const isHidden = state.hiddenSuppliers[si];
     if (isHidden) {
-      // Collapsed: single narrow column with expand trigger
       html += `
-      <th class="price-col sup-col-collapsed" title="${escHtml(sup)} — clique para expandir" onclick="toggleSupplier(${si})">
+      <th rowspan="2" class="price-col sup-col-collapsed col-sup-${si}-collapsed" title="${escHtml(sup)} — clique para expandir" onclick="toggleSupplier(${si})">
         <span class="collapsed-sup-label">${escHtml(sup.slice(0,6))}</span>
         <span class="collapsed-sup-expand">▶</span>
       </th>`;
     } else {
-      // Expanded: 2-column group with reorder + edit + minimize + delete controls
       html += `
-      <th colspan="2" class="price-col supplier-group">
+      <th colspan="2" class="price-col supplier-group col-sup-${si}-group" data-col="sup-${si}">
         <div style="display:flex;align-items:center;gap:4px;justify-content:center">
           <button class="sup-ctrl-btn sup-move-btn" onclick="moveSupplier(${si}, -1)" ${si === 0 ? 'disabled style="opacity:0.25;cursor:not-allowed"' : ''} title="Mover para esquerda (aparecer antes)">◀</button>
           <input class="supplier-name-input" id="sup-name-${si}"
                  value="${escHtml(sup)}"
                  onchange="updateSupplierName(${si}, this.value)"
                  placeholder="Fornecedor ${si+1}"
-                 style="flex:1;min-width:70px" />
+                 style="flex:1;min-width:60px" />
           <button class="sup-ctrl-btn sup-move-btn" onclick="moveSupplier(${si}, 1)" ${si === state.suppliers.length - 1 ? 'disabled style="opacity:0.25;cursor:not-allowed"' : ''} title="Mover para direita (aparecer depois)">▶</button>
           <button class="sup-ctrl-btn" onclick="toggleSupplier(${si})" title="Minimizar fornecedor">−</button>
           ${state.suppliers.length > 1
             ? `<button class="sup-ctrl-btn sup-ctrl-del" onclick="removeSupplier(${si})" title="Remover fornecedor">✕</button>`
             : ''}
         </div>
+        <div class="col-resizer" onmousedown="initColResize(event, 'sup-${si}')" ontouchstart="initColResize(event, 'sup-${si}')" ondblclick="resetColWidth('sup-${si}')" title="Arraste para redimensionar as colunas deste fornecedor"></div>
       </th>`;
     }
   });
 
   // + Add supplier column header
   html += `
-    <th class="price-col add-sup-th" title="Adicionar fornecedor" onclick="addSupplier()">
+    <th rowspan="2" class="price-col add-sup-th" title="Adicionar fornecedor" onclick="addSupplier()">
       <button class="sup-ctrl-btn sup-ctrl-add">＋</button>
     </th>
-    <th style="width:36px"></th>
+    <th rowspan="2" style="width:36px"></th>
   </tr>`;
 
   // Row 2: sub-headers (Preço Unit. / Total) per visible supplier
-  html += `<tr><th></th><th></th><th></th><th></th>`;
+  html += `<tr>`;
   state.suppliers.forEach((_, si) => {
-    if (state.hiddenSuppliers[si]) {
-      html += `<th class="price-col sup-col-collapsed" style="width:28px"></th>`;
-    } else {
-      html += `<th class="price-col" style="text-align:right;min-width:90px">Preço Unit.</th>
-               <th class="price-col" style="text-align:right;min-width:100px;color:var(--text-muted)">Total</th>`;
+    if (!state.hiddenSuppliers[si]) {
+      html += `
+        <th class="price-col col-sup-${si}-price" data-col="sup-${si}-price" style="text-align:right">
+          <span>Preço Unit.</span>
+          <div class="col-resizer" onmousedown="initColResize(event, 'sup-${si}-price')" ontouchstart="initColResize(event, 'sup-${si}-price')" ondblclick="resetColWidth('sup-${si}-price')" title="Arraste para redimensionar preço unitário"></div>
+        </th>
+        <th class="price-col col-sup-${si}-total" data-col="sup-${si}-total" style="text-align:right;color:var(--text-muted)">
+          <span>Total</span>
+          <div class="col-resizer" onmousedown="initColResize(event, 'sup-${si}-total')" ontouchstart="initColResize(event, 'sup-${si}-total')" ondblclick="resetColWidth('sup-${si}-total')" title="Arraste para redimensionar total"></div>
+        </th>`;
     }
   });
-  html += `<th></th><th></th></tr>`;
+  html += `</tr>`;
 
   thead.innerHTML = html;
 }
@@ -1848,22 +2159,22 @@ function renderTableBody() {
 
         html += `<tr class="item-row" data-item-id="${item.id}">
           <td class="td-item">
-            <input class="editable-cell" style="min-width:100px; font-weight:600"
+            <input class="editable-cell" style="font-weight:600"
                    value="${escHtml(item.name)}"
                    onchange="updateItemField('${item.id}', 'name', this.value)" />
           </td>
           <td class="td-desc">
-            <input class="editable-cell" style="min-width:150px; font-size:12px"
+            <input class="editable-cell" style="font-size:12px"
                    value="${escHtml(item.desc)}"
                    onchange="updateItemField('${item.id}', 'desc', this.value)" />
           </td>
           <td class="td-unit">
-            <input class="editable-cell" style="width:56px; text-align:center; font-size:12px"
+            <input class="editable-cell" style="text-align:center; font-size:12px"
                    value="${escHtml(item.unit)}"
                    onchange="updateItemField('${item.id}', 'unit', this.value)" />
           </td>
           <td class="td-qty">
-            <input class="editable-cell" type="number" style="width:52px; text-align:center"
+            <input class="editable-cell" type="number" style="text-align:center"
                    value="${item.qty}"
                    min="0" step="any"
                    oninput="updateItemField('${item.id}', 'qty', parseFloat(this.value)||0)"
@@ -1873,7 +2184,7 @@ function renderTableBody() {
         state.suppliers.forEach((_, si) => {
           if (state.hiddenSuppliers[si]) {
             // Collapsed supplier: show single narrow cell with expand indicator
-            html += `<td class="sup-col-collapsed sup-col-data" onclick="toggleSupplier(${si})" title="${escHtml(state.suppliers[si])} — clique para expandir">
+            html += `<td class="sup-col-collapsed sup-col-data col-sup-${si}-collapsed" onclick="toggleSupplier(${si})" title="${escHtml(state.suppliers[si])} — clique para expandir">
               <span style="font-size:9px;color:var(--border-light)">▶</span>
             </td>`;
             return;
@@ -1883,17 +2194,17 @@ function renderTableBody() {
           const total    = (priceVal || 0) * (item.qty || 0);
           const isBest   = bestPrice !== null && priceVal === bestPrice;
 
-          html += `<td class="td-price price-group${isBest ? " best-price" : ""}">
+          html += `<td class="td-price price-group col-sup-${si}-price${isBest ? " best-price" : ""}">
             <input class="editable-cell price-input" type="text"
-                   id="price-${item.id}-${si}"
-                   value="${priceVal ? fmtCurrencyRaw(priceVal) : ""}"
-                   placeholder="R$ 0,00"
-                   inputmode="decimal"
-                   oninput="updatePrice('${item.id}', ${si}, this.value)"
-                   onchange="updatePrice('${item.id}', ${si}, this.value)"
-                   onfocus="this.select()" />
+             id="price-${item.id}-${si}"
+             value="${priceVal ? fmtCurrencyRaw(priceVal) : ""}"
+             placeholder="R$ 0,00"
+             inputmode="decimal"
+             oninput="updatePrice('${item.id}', ${si}, this.value)"
+             onchange="updatePrice('${item.id}', ${si}, this.value)"
+             onfocus="this.select()" />
           </td>
-          <td class="td-total${isBest ? " best-price" : ""}">
+          <td class="td-total col-sup-${si}-total${isBest ? " best-price" : ""}">
             <span class="total-display" id="total-${item.id}-${si}">
               ${total > 0 ? fmtCurrency(total) : '<span class="price-empty">—</span>'}
             </span>
@@ -1937,13 +2248,13 @@ function renderTotals() {
   state.suppliers.forEach((_, si) => {
     if (state.hiddenSuppliers[si]) {
       // Collapsed: show a narrow cell
-      html += `<td class="sup-col-collapsed price-group" onclick="toggleSupplier(${si})"
+      html += `<td class="sup-col-collapsed price-group col-sup-${si}-collapsed" onclick="toggleSupplier(${si})"
                    title="${escHtml(state.suppliers[si])} — expandir" style="cursor:pointer"></td>`;
       return;
     }
     const isCheapest = si === cheapestIdx && totals[si] > 0;
     html += `
-    <td colspan="2" class="grand-total price-group${isCheapest ? " cheapest-col" : ""}">
+    <td colspan="2" class="grand-total price-group col-sup-${si}-group${isCheapest ? " cheapest-col" : ""}">
       ${totals[si] > 0 ? fmtCurrency(totals[si]) : "—"}
       ${isCheapest ? '<span style="font-size:10px;margin-left:4px">✅ Menor</span>' : ""}
     </td>`;
